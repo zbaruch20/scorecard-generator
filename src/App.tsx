@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { Container, Form, FormControl, FormGroup, FormLabel, FormText, Navbar, NavbarBrand } from "react-bootstrap"
 import Competitor from "./models/competitor"
+import { navBrand } from "./styles"
 
 const App = () => {
   const [competition, setCompetition] = useState<string>(`My Competition ${new Date().getFullYear()}`)
@@ -27,13 +28,13 @@ const App = () => {
     <>
       <Navbar bg="primary">
         <Container>
-          <NavbarBrand className="text-light h1" style={{ fontSize: '32px' }}>
+          <NavbarBrand className="text-light h1" style={navBrand}>
             Competition Scorecard Generator
           </NavbarBrand>
         </Container>
       </Navbar>
 
-      <Container style={{ marginTop: "1em" }}>
+      <Container className="mt-3">
         <Form>
           <FormGroup className="mb-3">
             <FormLabel>Competition Name</FormLabel>
