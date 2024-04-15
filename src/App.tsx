@@ -1,8 +1,8 @@
 import React, { useState } from "react"
 import { Container, Form, FormControl, FormGroup, FormLabel, FormText, Navbar, NavbarBrand } from "react-bootstrap"
-import Competitor from "../models/competitor"
+import Competitor from "./models/competitor"
 
-const Home = () => {
+const App = () => {
   const [competition, setCompetition] = useState<string>(`My Competition ${new Date().getFullYear()}`)
   const [event, setEvent] = useState<string>('My Event')
   const [round, setRound] = useState<number>(1)
@@ -60,4 +60,4 @@ const Home = () => {
   )
 }
 
-export default Home
+export default App
