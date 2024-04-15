@@ -37,7 +37,7 @@ const App = () => {
       <Container className="mt-3">
         <Form>
           <Row className="mb-3">
-            <Col xs={12} md className="mb-3">
+            <Col xs={12} md>
               <FormLabel>Competition Name</FormLabel>
               <FormControl
                 type="text"
@@ -45,6 +45,8 @@ const App = () => {
                 placeholder={competition}
               />
               <FormText />
+              {/* only include space if smaller than md */}
+              <p className="d-md-none mb-3"></p> 
             </Col>
 
             <Col xs={12} md>
@@ -53,6 +55,32 @@ const App = () => {
                 type="text"
                 onChange={e => setValue(e, setEvent)}
                 placeholder={event}
+              />
+              <FormText />
+            </Col>
+          </Row>
+
+          <Row className="mb-3">
+            <Col>
+              <FormLabel>Round</FormLabel>
+              <FormControl
+                type="number"
+                onChange={e => setValue(e, setRound)}
+                value={round}
+                min={1}
+                max={4}
+              />
+              <FormText />
+            </Col>
+
+            <Col>
+              <FormLabel>Number of Attempts</FormLabel>
+              <FormControl
+                type="number"
+                onChange={e => setValue(e, setNumAttempts)}
+                value={numAttempts}
+                min={1}
+                max={5}
               />
               <FormText />
             </Col>
