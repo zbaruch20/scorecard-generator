@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Container, Form, FormControl, FormGroup, FormLabel, FormText, Navbar, NavbarBrand } from "react-bootstrap"
+import { Col, Container, Form, FormControl, FormGroup, FormLabel, FormText, Navbar, NavbarBrand, Row } from "react-bootstrap"
 import Competitor from "./models/competitor"
 import { navBrand } from "./styles"
 
@@ -36,25 +36,27 @@ const App = () => {
 
       <Container className="mt-3">
         <Form>
-          <FormGroup className="mb-3">
-            <FormLabel>Competition Name</FormLabel>
-            <FormControl
-              type="text"
-              onChange={e => setValue(e, setCompetition)}
-              placeholder={competition}
-            />
-            <FormText />
-          </FormGroup>
+          <Row className="mb-3">
+            <Col xs={12} md className="mb-3">
+              <FormLabel>Competition Name</FormLabel>
+              <FormControl
+                type="text"
+                onChange={e => setValue(e, setCompetition)}
+                placeholder={competition}
+              />
+              <FormText />
+            </Col>
 
-          <FormGroup className="mb-3">
-            <FormLabel>Event Name</FormLabel>
-            <FormControl
-              type="text"
-              onChange={e => setValue(e, setEvent)}
-              placeholder={event}
-            />
-            <FormText />
-          </FormGroup>
+            <Col xs={12} md>
+              <FormLabel>Event Name</FormLabel>
+              <FormControl
+                type="text"
+                onChange={e => setValue(e, setEvent)}
+                placeholder={event}
+              />
+              <FormText />
+            </Col>
+          </Row>
         </Form>
       </Container>
     </>
