@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Col, Container, Form, FormControl, FormGroup, FormLabel, FormText, Navbar, NavbarBrand, Row } from "react-bootstrap"
+import { Col, Container, Form, FormCheck, FormControl, FormGroup, FormLabel, FormText, Navbar, NavbarBrand, Row } from "react-bootstrap"
 import Competitor from "./models/competitor"
 import { navBrand } from "./styles"
 
@@ -24,6 +24,37 @@ const App = () => {
     setFunc(e.target.value) // e needs to be any type since React events are weird
   }
 
+  const OptionalCutoffForm = () => (
+    <>
+      {!!hasCutoff && <>
+        <Col xs={3}>
+          <FormLabel>Cutoff Minutes</FormLabel>
+          <FormControl
+            type="number"
+            onChange={e => setValue(e, setCutoffMinutes)}
+            value={cutoffMinutes}
+            min={0}
+            max={timeLimitMinutes}
+          />
+          <FormText />
+        </Col>
+
+        <Col xs={3}>
+          <FormLabel>Cutoff Seconds</FormLabel>
+          <FormControl
+            type="number"
+            onChange={e => setValue(e, setCutoffSeconds)}
+            value={cutoffSeconds}
+            min={0}
+            max={cutoffMinutes == timeLimitMinutes ? timeLimitSeconds : 59}
+          />
+          <FormText />
+        </Col>
+      </>
+      }
+    </>
+  )
+
   return (
     <>
       <Navbar bg="primary">
@@ -46,7 +77,7 @@ const App = () => {
               />
               <FormText />
               {/* only include space if smaller than md */}
-              <p className="d-md-none mb-3"></p> 
+              <p className="d-md-none mb-3"></p>
             </Col>
 
             <Col xs={12} md>
@@ -84,6 +115,54 @@ const App = () => {
               />
               <FormText />
             </Col>
+          </Row>
+
+          <Row>
+            <div>
+              <FormLabel className="pe-3">Include Cutoff?</FormLabel>
+              <FormCheck
+                inline
+                type="radio"
+                label="Yes"
+                name="hasCutoff"
+                onChange={_ => setHasCutoff(true)}
+              />
+              <FormCheck
+                inline
+                type="radio"
+                label="No"
+                name="hasCutoff"
+                checked={!hasCutoff}
+                onChange={_ => setHasCutoff(false)}
+              />
+            </div>
+          </Row>
+
+          <Row className="mb-3">
+            <Col xs={3}>
+              <FormLabel>Time Limit Minutes</FormLabel>
+              <FormControl
+                type="number"
+                onChange={e => setValue(e, setTimeLimitMinutes)}
+                value={timeLimitMinutes}
+                min={0}
+              />
+              <FormText />
+            </Col>
+
+            <Col xs={3}>
+              <FormLabel>Time Limit Seconds</FormLabel>
+              <FormControl
+                type="number"
+                onChange={e => setValue(e, setTimeLimitSeconds)}
+                value={timeLimitSeconds}
+                min={0}
+                max={59}
+              />
+              <FormText />
+            </Col>
+
+            <OptionalCutoffForm />
           </Row>
         </Form>
       </Container>
