@@ -1,4 +1,5 @@
 import Competitor from "./competitor"
+import GroupFormat from "./group-format"
 
 export default interface ScorecardData {
   competition: string
@@ -13,8 +14,9 @@ export default interface ScorecardData {
   timeLimitMinutes: number
   timeLimitSeconds: number
 
-  numGroups: number
+  groupFormat: GroupFormat
   numBlanksPerGroup: number
+  numGroups: number
 
   competitors: Competitor[]
 }
