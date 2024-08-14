@@ -1,6 +1,6 @@
 import React, { useState } from "react"
-import { Col, Container, Form, FormCheck, FormControl, FormGroup, FormLabel, FormText, Navbar, NavbarBrand, Row } from "react-bootstrap"
-import Competitor from "./models/competitor"
+import { Button, Col, Container, Form, FormCheck, FormControl, FormGroup, FormLabel, FormText, Navbar, NavbarBrand, Row, Table } from "react-bootstrap"
+import Competitor, { newCompetitor } from "./models/competitor"
 import { navBrand } from "./styles"
 import GroupFormat, { GroupFormatStrings } from "./models/group-format"
 
@@ -21,10 +21,37 @@ const App = () => {
 
   const [includeIds, setIncludeIds] = useState<boolean>(false)
 
+  const [currentCompetitor, setCurrentCompetitor] = useState<Competitor>(newCompetitor())
+  const [currentCompetitorIdx, setCurrentCompetitorIdx] = useState<number>(0)
   const [competitors, setCompetitors] = useState<Competitor[]>([])
 
   const setValue = (e: any, setFunc: React.Dispatch<React.SetStateAction<any>>) => {
     setFunc(e.target.value) // e needs to be any type since React events are weird
+  }
+
+  const isManualGroups = () => GroupFormat.Manual == groupFormat
+
+  const competitorNameColSize = () => {
+    if (!includeIds && !isManualGroups()) {
+      return 12;
+    } else if ((includeIds && !isManualGroups()) || (!includeIds && isManualGroups())) {
+      return 11;
+    } else {
+      return 10;
+    }
+  }
+
+  const addCompetitor = () => {
+    setCompetitors(competitors => {
+      competitors[currentCompetitorIdx] = currentCompetitor
+      setCurrentCompetitorIdx(competitors.length)
+      return competitors
+    })
+    setCurrentCompetitor(newCompetitor())
+  }
+
+  const deleteCompetitor = (idx: number) => {
+    setCompetitors(competitors => competitors.filter(c => c !== competitors[idx]))
   }
 
   const OptionalCutoffForm = () => (
@@ -85,6 +112,7 @@ const App = () => {
       </Navbar>
 
       <Container className="mt-3">
+        <h3>Competition Info</h3>
         <Form>
           <Row className="mb-3">
             <Col xs={12} md>
@@ -234,7 +262,104 @@ const App = () => {
 
             <OptionalNumGroupsForm />
           </Row>
+
+          <hr />
+
+          <h3>Competitors</h3>
+          <Row className="mb-3">
+            {includeIds &&
+              <Col xs={1}>
+                <FormLabel>ID</FormLabel>
+                <FormControl
+                  type="number"
+                  onChange={e => setCurrentCompetitor(c => ({ ...c, id: Number(e.target.value) }))}
+                  value={currentCompetitor.id}
+                  min={1}
+                />
+              </Col>
+            }
+            {isManualGroups() &&
+              <Col xs={1}>
+                <FormLabel>Group</FormLabel>
+                <FormControl
+                  type="number"
+                  onChange={e => setCurrentCompetitor(c => ({ ...c, group: Number(e.target.value) }))}
+                  value={currentCompetitor.group}
+                  min={1}
+                />
+              </Col>
+            }
+            <Col xs={competitorNameColSize()}>
+              <FormLabel>Competitor Name</FormLabel>
+              <FormControl
+                type="text"
+                onChange={e => setCurrentCompetitor(c => ({ ...c, name: e.target.value }))}
+                value={currentCompetitor.name}
+                placeholder="Kalindu Sachintha Wijesundara"
+                onKeyDown={(e) => {
+                  if ("Enter" == e.key && currentCompetitor.name.length > 0) {
+                    addCompetitor()
+                  }
+                }}
+              />
+            </Col>
+          </Row>
         </Form>
+
+        <Button
+          variant="primary"
+          disabled={currentCompetitor.name.length == 0}
+          onClick={addCompetitor}
+        >
+          Add Competitor
+        </Button>
+      </Container>
+
+      <Container className="mt-4">
+        {competitors.length > 0 &&
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                {includeIds && <th>ID</th>}
+                {isManualGroups() && <th>Group</th>}
+                <th>Competitor Name</th>
+                <th>Modify?</th>
+              </tr>
+            </thead>
+            <tbody>
+              {competitors.map((c, i) =>
+                <tr key={i}>
+                  {includeIds && <td>{c.id}</td>}
+                  {isManualGroups() && <td>{c.group}</td>}
+                  <td>{c.name}</td>
+                  <td>
+                    <Button
+                      className="me-1"
+                      variant="warning"
+                      size="sm"
+                      onClick={() => {
+                        setCurrentCompetitor(competitors[i])
+                        setCurrentCompetitorIdx(i)
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => {
+                        deleteCompetitor(i)
+                        setCurrentCompetitorIdx(curr => curr - 1)
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        }
       </Container>
     </>
   )

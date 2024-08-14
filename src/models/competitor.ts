@@ -3,3 +3,9 @@ export default interface Competitor {
   name: string
   group: number
 }
+
+export const newCompetitor: () => Competitor = () => ({
+  id: 1,
+  name: '',
+  group: 1
+})
