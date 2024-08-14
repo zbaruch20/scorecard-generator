@@ -19,6 +19,8 @@ const App = () => {
   const [numBlanksPerGroup, setNumBlanksPerGroup] = useState<number>(0)
   const [numGroups, setNumGroups] = useState<number>(1)
 
+  const [includeIds, setIncludeIds] = useState<boolean>(false)
+
   const [competitors, setCompetitors] = useState<Competitor[]>([])
 
   const setValue = (e: any, setFunc: React.Dispatch<React.SetStateAction<any>>) => {
@@ -134,7 +136,7 @@ const App = () => {
             </Col>
           </Row>
 
-          <div>
+          <>
             <FormLabel className="pe-3">Include Cutoff?</FormLabel>
             <FormCheck
               inline
@@ -151,7 +153,7 @@ const App = () => {
               checked={!hasCutoff}
               onChange={_ => setHasCutoff(false)}
             />
-          </div>
+          </>
 
           <Row className="mb-3">
             <Col xs={3}>
@@ -180,22 +182,43 @@ const App = () => {
             <OptionalCutoffForm />
           </Row>
 
-          <div>
-            <FormLabel className="me-3">Group Format</FormLabel>
-            {Object.keys(GroupFormat)
-              .filter(k => isNaN(Number(k)))
-              .map((format: string, i) =>
-                <FormCheck
-                  key={i}
-                  inline
-                  type="radio"
-                  label={format}
-                  name="groupFormat"
-                  checked={groupFormat == format}
-                  onChange={_ => setGroupFormat(GroupFormat[format as GroupFormatStrings])}
-                />
-              )}
-          </div>
+          <Row className="me-3">
+            <Col xs={6}>
+              <FormLabel className="me-3">Group Format</FormLabel>
+              {Object.keys(GroupFormat)
+                .filter(k => isNaN(Number(k)))
+                .map((format: string, i) =>
+                  <FormCheck
+                    key={i}
+                    inline
+                    type="radio"
+                    label={format}
+                    name="groupFormat"
+                    checked={groupFormat == format}
+                    onChange={_ => setGroupFormat(GroupFormat[format as GroupFormatStrings])}
+                  />
+                )}
+            </Col>
+
+            <Col xs={6}>
+              <FormLabel className="mx-3">Include Competitor IDs?</FormLabel>
+              <FormCheck
+                inline
+                type="radio"
+                label="Yes"
+                name="includeIds"
+                onChange={_ => setIncludeIds(true)}
+              />
+              <FormCheck
+                inline
+                type="radio"
+                label="No"
+                name="includeIds"
+                checked={!includeIds}
+                onChange={_ => setIncludeIds(false)}
+              />
+            </Col>
+          </Row>
 
           <Row className="mb-3">
             <Col xs={3}>
