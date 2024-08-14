@@ -3,6 +3,7 @@ import { Button, Col, Container, Form, FormCheck, FormControl, FormGroup, FormLa
 import Competitor, { newCompetitor } from "./models/competitor"
 import { navBrand } from "./styles"
 import GroupFormat, { GroupFormatStrings } from "./models/group-format"
+import { randomName } from "./models/sample-names"
 
 const App = () => {
   const [competition, setCompetition] = useState<string>(`My Competition ${new Date().getFullYear()}`)
@@ -21,6 +22,7 @@ const App = () => {
 
   const [includeIds, setIncludeIds] = useState<boolean>(false)
 
+  const [competitorNamePlaceholder, setCompetitorNamePlaceholder] = useState<string>("My Competitor")
   const [currentCompetitor, setCurrentCompetitor] = useState<Competitor>(newCompetitor())
   const [currentCompetitorIdx, setCurrentCompetitorIdx] = useState<number>(0)
   const [competitors, setCompetitors] = useState<Competitor[]>([])
@@ -41,17 +43,26 @@ const App = () => {
     }
   }
 
+  const getCompetitorNamePlaceholder = (competitors: Competitor[]) => (
+    competitors.length > 0 ? randomName() : "My Competitor"
+  )
+
   const addCompetitor = () => {
     setCompetitors(competitors => {
       competitors[currentCompetitorIdx] = currentCompetitor
       setCurrentCompetitorIdx(competitors.length)
+      setCompetitorNamePlaceholder(randomName())
       return competitors
     })
     setCurrentCompetitor(newCompetitor())
   }
 
   const deleteCompetitor = (idx: number) => {
-    setCompetitors(competitors => competitors.filter(c => c !== competitors[idx]))
+    setCompetitors(competitors => {
+      const deleted = competitors.filter(c => c !== competitors[idx])
+      setCompetitorNamePlaceholder(getCompetitorNamePlaceholder(deleted))
+      return deleted
+    })
   }
 
   const OptionalCutoffForm = () => (
@@ -295,7 +306,7 @@ const App = () => {
                 type="text"
                 onChange={e => setCurrentCompetitor(c => ({ ...c, name: e.target.value }))}
                 value={currentCompetitor.name}
-                placeholder="Kalindu Sachintha Wijesundara"
+                placeholder={competitorNamePlaceholder}
                 onKeyDown={(e) => {
                   if ("Enter" == e.key && currentCompetitor.name.length > 0) {
                     addCompetitor()
