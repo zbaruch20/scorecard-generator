@@ -60,8 +60,10 @@ const App = () => {
   }
 
   const addBulkCompetitors = () => {
-    const newCompetitors = bulkNames.split(/\n/)
-      .map((n) => ({name: n} as Competitor))
+    const newCompetitors = bulkNames.split(/\n/).map((n) => ({name: n} as Competitor))
+    if (competitors.length === currentCompetitorIdx) {
+      setCurrentCompetitorIdx(curr => curr + newCompetitors.length)
+    }
     setCompetitors(competitors => [...competitors, ...newCompetitors])
     setBulkNames('')
     setShowBulkEntry(false)
