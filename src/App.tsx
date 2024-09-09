@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Button, Col, Container, Form, FormCheck, FormControl, FormGroup, FormLabel, FormText, Navbar, NavbarBrand, Row, Table } from "react-bootstrap"
+import { Button, Col, Container, Form, FormCheck, FormControl, FormGroup, FormLabel, FormText, Modal, ModalBody, ModalFooter, ModalHeader, ModalTitle, Navbar, NavbarBrand, Row, Table } from "react-bootstrap"
 import Competitor, { newCompetitor } from "./models/competitor"
 import { navBrand } from "./styles"
 import GroupFormat, { GroupFormatStrings } from "./models/group-format"
@@ -25,6 +25,8 @@ const App = () => {
   const [competitorNamePlaceholder, setCompetitorNamePlaceholder] = useState<string>("My Competitor")
   const [currentCompetitor, setCurrentCompetitor] = useState<Competitor>(newCompetitor())
   const [currentCompetitorIdx, setCurrentCompetitorIdx] = useState<number>(0)
+  const [showBulkEntry, setShowBulkEntry] = useState<boolean>(false)
+  const [bulkNames, setBulkNames] = useState<string>('')
   const [competitors, setCompetitors] = useState<Competitor[]>([])
 
   const setValue = (e: any, setFunc: React.Dispatch<React.SetStateAction<any>>) => {
@@ -55,6 +57,14 @@ const App = () => {
       return competitors
     })
     setCurrentCompetitor(newCompetitor())
+  }
+
+  const addBulkCompetitors = () => {
+    const newCompetitors = bulkNames.split(/\n/)
+      .map((n) => ({name: n} as Competitor))
+    setCompetitors(competitors => [...competitors, ...newCompetitors])
+    setBulkNames('')
+    setShowBulkEntry(false)
   }
 
   const deleteCompetitor = (idx: number) => {
@@ -324,6 +334,13 @@ const App = () => {
         >
           Add Competitor
         </Button>
+        <Button
+          className="mx-2"
+          variant="outline-primary"
+          onClick={() => setShowBulkEntry(true)}
+        >
+          Bulk Entry
+        </Button>
       </Container>
 
       <Container className="mt-4">
@@ -372,6 +389,32 @@ const App = () => {
           </Table>
         }
       </Container>
+
+      <Modal show={showBulkEntry} onHide={() => setShowBulkEntry(false)}>
+        <ModalHeader closeButton>
+          <ModalTitle>Bulk Competitor Entry</ModalTitle>
+        </ModalHeader>
+
+        <ModalBody>
+          <FormLabel>Enter a list of competitors, one name per line:</FormLabel>
+          <FormControl
+            as="textarea"
+            rows={4}
+            placeholder='Competitor Names Here'
+            value={bulkNames}
+            onChange={e => setValue(e, setBulkNames)}
+          />
+        </ModalBody>
+
+        <ModalFooter>
+          <Button variant="secondary" onClick={() => setShowBulkEntry(false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={addBulkCompetitors}>
+            Add Competitors
+          </Button>
+        </ModalFooter>
+      </Modal>
     </>
   )
 }
