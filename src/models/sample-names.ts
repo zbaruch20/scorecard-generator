@@ -30,7 +30,15 @@ const sampleNames = [
   "CubeLeg",
   "A7g",
   "2k6",
-  "#FreeKalindu"
+  "#FreeKalindu",
+  "Jack Bohning",
+  "Geometrick",
+  ":3",
+  "wysi",
+  "727",
+  "Mirror Blocks World Record holder",
+  "ODWRÓĆ ODWRÓĆ",
+  "Osiem"
 ]
 
 export default sampleNames
