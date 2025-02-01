@@ -1,138 +1,169 @@
-import React, { useState } from "react"
-import { Button, Col, Container, Form, FormCheck, FormControl, FormGroup, FormLabel, FormText, Modal, ModalBody, ModalFooter, ModalHeader, ModalTitle, Navbar, NavbarBrand, Row, Table } from "react-bootstrap"
-import Competitor, { newCompetitor } from "./models/competitor"
-import { navBrand } from "./styles"
-import GroupFormat, { GroupFormatStrings } from "./models/group-format"
-import { randomName } from "./models/sample-names"
+import React, { useState } from "react";
+import {
+  Button,
+  Col,
+  Container,
+  Form,
+  FormCheck,
+  FormControl,
+  FormLabel,
+  FormText,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+  Row,
+  Table,
+} from "react-bootstrap";
+import Competitor, { newCompetitor } from "./models/competitor";
+import GroupFormat, { GroupFormatStrings } from "./models/group-format";
+import { randomName } from "./models/sample-names";
+import ScorecardData from "./models/scorecard-data";
+import generateScorecards from "./services/scorecard-service";
+import ScorecardGeneratorCopyright from "./components/copyright";
+import ScorecardGeneratorNavbar from "./components/navbar";
 
 const App = () => {
-  const [competition, setCompetition] = useState<string>(`My Competition ${new Date().getFullYear()}`)
-  const [event, setEvent] = useState<string>('My Event')
-  const [round, setRound] = useState<number>(1)
-  const [numAttempts, setNumAttempts] = useState<number>(5)
-  const [hasCutoff, setHasCutoff] = useState<boolean>(false)
-  const [cutoffMinutes, setCutoffMinutes] = useState<number>(0)
-  const [cutoffSeconds, setCutoffSeconds] = useState<number>(0)
-  const [timeLimitMinutes, setTimeLimitMinutes] = useState<number>(10)
-  const [timeLimitSeconds, setTimeLimitSeconds] = useState<number>(0)
+  const [competition, setCompetition] = useState<string>(
+    `My Competition ${new Date().getFullYear()}`
+  );
+  const [event, setEvent] = useState<string>("My Event");
+  const [round, setRound] = useState<number>(1);
+  const [numAttempts, setNumAttempts] = useState<number>(5);
+  const [hasCutoff, setHasCutoff] = useState<boolean>(false);
+  const [cutoffMinutes, setCutoffMinutes] = useState<number>(0);
+  const [cutoffSeconds, setCutoffSeconds] = useState<number>(0);
+  const [timeLimitMinutes, setTimeLimitMinutes] = useState<number>(10);
+  const [timeLimitSeconds, setTimeLimitSeconds] = useState<number>(0);
 
-  const [groupFormat, setGroupFormat] = useState<GroupFormat>(GroupFormat.Blank)
-  const [numBlanksPerGroup, setNumBlanksPerGroup] = useState<number>(0)
-  const [numGroups, setNumGroups] = useState<number>(1)
+  const [groupFormat, setGroupFormat] = useState<GroupFormat>(
+    GroupFormat.Blank
+  );
+  const [numBlanksPerGroup, setNumBlanksPerGroup] = useState<number>(0);
+  const [numGroups, setNumGroups] = useState<number>(1);
 
-  const [includeIds, setIncludeIds] = useState<boolean>(false)
+  const [includeIds, setIncludeIds] = useState<boolean>(false);
 
-  const [competitorNamePlaceholder, setCompetitorNamePlaceholder] = useState<string>("My Competitor")
-  const [currentCompetitor, setCurrentCompetitor] = useState<Competitor>(newCompetitor())
-  const [currentCompetitorIdx, setCurrentCompetitorIdx] = useState<number>(0)
-  const [showBulkEntry, setShowBulkEntry] = useState<boolean>(false)
-  const [bulkNames, setBulkNames] = useState<string>('')
-  const [competitors, setCompetitors] = useState<Competitor[]>([])
+  const [competitorNamePlaceholder, setCompetitorNamePlaceholder] =
+    useState<string>("My Competitor");
+  const [currentCompetitor, setCurrentCompetitor] = useState<Competitor>(
+    newCompetitor()
+  );
+  const [currentCompetitorIdx, setCurrentCompetitorIdx] = useState<number>(0);
+  const [showBulkEntry, setShowBulkEntry] = useState<boolean>(false);
+  const [bulkNames, setBulkNames] = useState<string>("");
+  const [competitors, setCompetitors] = useState<Competitor[]>([]);
 
-  const setValue = (e: any, setFunc: React.Dispatch<React.SetStateAction<any>>) => {
-    setFunc(e.target.value) // e needs to be any type since React events are weird
-  }
+  const setValue = (
+    e: any,
+    setFunc: React.Dispatch<React.SetStateAction<any>>
+  ) => {
+    setFunc(e.target.value); // e needs to be any type since React events are weird
+  };
 
-  const isManualGroups = () => GroupFormat.Manual == groupFormat
+  const isManualGroups = () => GroupFormat.Manual == groupFormat;
 
   const competitorNameColSize = () => {
     if (!includeIds && !isManualGroups()) {
       return 12;
-    } else if ((includeIds && !isManualGroups()) || (!includeIds && isManualGroups())) {
+    } else if (
+      (includeIds && !isManualGroups()) ||
+      (!includeIds && isManualGroups())
+    ) {
       return 11;
     } else {
       return 10;
     }
-  }
+  };
 
-  const getCompetitorNamePlaceholder = (competitors: Competitor[]) => (
-    competitors.length > 0 ? randomName() : "My Competitor"
-  )
+  const getCompetitorNamePlaceholder = (competitors: Competitor[]) =>
+    competitors.length > 0 ? randomName() : "My Competitor";
 
   const addCompetitor = () => {
-    setCompetitors(competitors => {
-      competitors[currentCompetitorIdx] = currentCompetitor
-      setCurrentCompetitorIdx(competitors.length)
-      setCompetitorNamePlaceholder(randomName())
-      return competitors
-    })
-    setCurrentCompetitor(newCompetitor())
-  }
+    setCompetitors((competitors) => {
+      competitors[currentCompetitorIdx] = currentCompetitor;
+      setCurrentCompetitorIdx(competitors.length);
+      setCompetitorNamePlaceholder(randomName());
+      return competitors;
+    });
+    setCurrentCompetitor(newCompetitor());
+  };
 
   const addBulkCompetitors = () => {
-    const newCompetitors = bulkNames.split(/\n/).map((n) => ({name: n} as Competitor))
+    const newCompetitors = bulkNames
+      .split(/\n/)
+      .map((n) => ({ name: n } as Competitor));
     if (competitors.length === currentCompetitorIdx) {
-      setCurrentCompetitorIdx(curr => curr + newCompetitors.length)
+      setCurrentCompetitorIdx((curr) => curr + newCompetitors.length);
     }
-    setCompetitors(competitors => [...competitors, ...newCompetitors])
-    setBulkNames('')
-    setShowBulkEntry(false)
-  }
+    setCompetitors((competitors) => [...competitors, ...newCompetitors]);
+    setBulkNames("");
+    setShowBulkEntry(false);
+  };
 
   const deleteCompetitor = (idx: number) => {
-    setCompetitors(competitors => {
-      const deleted = competitors.filter(c => c !== competitors[idx])
-      setCompetitorNamePlaceholder(getCompetitorNamePlaceholder(deleted))
-      return deleted
-    })
-  }
+    setCompetitors((competitors) => {
+      const deleted = competitors.filter((c) => c !== competitors[idx]);
+      setCompetitorNamePlaceholder(getCompetitorNamePlaceholder(deleted));
+      return deleted;
+    });
+  };
 
   const OptionalCutoffForm = () => (
     <>
-      {!!hasCutoff && <>
-        <Col xs={3}>
-          <FormLabel>Cutoff Minutes</FormLabel>
-          <FormControl
-            type="number"
-            onChange={e => setValue(e, setCutoffMinutes)}
-            value={cutoffMinutes}
-            min={0}
-            max={timeLimitMinutes}
-          />
-          <FormText />
-        </Col>
+      {!!hasCutoff && (
+        <>
+          <Col xs={3}>
+            <FormLabel>Cutoff Minutes</FormLabel>
+            <FormControl
+              type="number"
+              onChange={(e) => setValue(e, setCutoffMinutes)}
+              value={cutoffMinutes}
+              min={0}
+              max={timeLimitMinutes}
+            />
+            <FormText />
+          </Col>
 
-        <Col xs={3}>
-          <FormLabel>Cutoff Seconds</FormLabel>
-          <FormControl
-            type="number"
-            onChange={e => setValue(e, setCutoffSeconds)}
-            value={cutoffSeconds}
-            min={0}
-            max={cutoffMinutes == timeLimitMinutes ? timeLimitSeconds : 59}
-          />
-          <FormText />
-        </Col>
-      </>
-      }
+          <Col xs={3}>
+            <FormLabel>Cutoff Seconds</FormLabel>
+            <FormControl
+              type="number"
+              onChange={(e) => setValue(e, setCutoffSeconds)}
+              value={cutoffSeconds}
+              min={0}
+              max={cutoffMinutes == timeLimitMinutes ? timeLimitSeconds : 59}
+            />
+            <FormText />
+          </Col>
+        </>
+      )}
     </>
-  )
+  );
 
   const OptionalNumGroupsForm = () => {
-    return <>
-      {(GroupFormat.Random == groupFormat) &&
-        <Col xs={3}>
-          <FormLabel>Number of Groups</FormLabel>
-          <FormControl
-            type="number"
-            onChange={e => setValue(e, setNumGroups)}
-            value={numGroups}
-            min={1}
-          />
-          <FormText />
-        </Col>}
-    </>
-  }
+    return (
+      <>
+        {GroupFormat.Random == groupFormat && (
+          <Col xs={3}>
+            <FormLabel>Number of Groups</FormLabel>
+            <FormControl
+              type="number"
+              onChange={(e) => setValue(e, setNumGroups)}
+              value={numGroups}
+              min={1}
+            />
+            <FormText />
+          </Col>
+        )}
+      </>
+    );
+  };
 
   return (
     <>
-      <Navbar bg="primary">
-        <Container>
-          <NavbarBrand className="text-light h1" style={navBrand}>
-            Competition Scorecard Generator
-          </NavbarBrand>
-        </Container>
-      </Navbar>
+      <ScorecardGeneratorNavbar />
 
       <Container className="mt-3">
         <h3>Competition Info</h3>
@@ -142,7 +173,7 @@ const App = () => {
               <FormLabel>Competition Name</FormLabel>
               <FormControl
                 type="text"
-                onChange={e => setValue(e, setCompetition)}
+                onChange={(e) => setValue(e, setCompetition)}
                 placeholder={competition}
               />
               <FormText />
@@ -154,7 +185,7 @@ const App = () => {
               <FormLabel>Event Name</FormLabel>
               <FormControl
                 type="text"
-                onChange={e => setValue(e, setEvent)}
+                onChange={(e) => setValue(e, setEvent)}
                 placeholder={event}
               />
               <FormText />
@@ -166,7 +197,7 @@ const App = () => {
               <FormLabel>Round</FormLabel>
               <FormControl
                 type="number"
-                onChange={e => setValue(e, setRound)}
+                onChange={(e) => setValue(e, setRound)}
                 value={round}
                 min={1}
                 max={4}
@@ -178,7 +209,7 @@ const App = () => {
               <FormLabel>Number of Attempts</FormLabel>
               <FormControl
                 type="number"
-                onChange={e => setValue(e, setNumAttempts)}
+                onChange={(e) => setValue(e, setNumAttempts)}
                 value={numAttempts}
                 min={1}
                 max={5}
@@ -194,7 +225,7 @@ const App = () => {
               type="radio"
               label="Yes"
               name="hasCutoff"
-              onChange={_ => setHasCutoff(true)}
+              onChange={(_) => setHasCutoff(true)}
             />
             <FormCheck
               inline
@@ -202,7 +233,7 @@ const App = () => {
               label="No"
               name="hasCutoff"
               checked={!hasCutoff}
-              onChange={_ => setHasCutoff(false)}
+              onChange={(_) => setHasCutoff(false)}
             />
           </>
 
@@ -211,7 +242,7 @@ const App = () => {
               <FormLabel>Time Limit Minutes</FormLabel>
               <FormControl
                 type="number"
-                onChange={e => setValue(e, setTimeLimitMinutes)}
+                onChange={(e) => setValue(e, setTimeLimitMinutes)}
                 value={timeLimitMinutes}
                 min={0}
               />
@@ -222,7 +253,7 @@ const App = () => {
               <FormLabel>Time Limit Seconds</FormLabel>
               <FormControl
                 type="number"
-                onChange={e => setValue(e, setTimeLimitSeconds)}
+                onChange={(e) => setValue(e, setTimeLimitSeconds)}
                 value={timeLimitSeconds}
                 min={0}
                 max={59}
@@ -237,8 +268,8 @@ const App = () => {
             <Col xs={6}>
               <FormLabel className="me-3">Group Format</FormLabel>
               {Object.keys(GroupFormat)
-                .filter(k => isNaN(Number(k)))
-                .map((format: string, i) =>
+                .filter((k) => isNaN(Number(k)))
+                .map((format: string, i) => (
                   <FormCheck
                     key={i}
                     inline
@@ -246,9 +277,11 @@ const App = () => {
                     label={format}
                     name="groupFormat"
                     checked={groupFormat == format}
-                    onChange={_ => setGroupFormat(GroupFormat[format as GroupFormatStrings])}
+                    onChange={(_) =>
+                      setGroupFormat(GroupFormat[format as GroupFormatStrings])
+                    }
                   />
-                )}
+                ))}
             </Col>
 
             <Col xs={6}>
@@ -258,7 +291,7 @@ const App = () => {
                 type="radio"
                 label="Yes"
                 name="includeIds"
-                onChange={_ => setIncludeIds(true)}
+                onChange={(_) => setIncludeIds(true)}
               />
               <FormCheck
                 inline
@@ -266,17 +299,20 @@ const App = () => {
                 label="No"
                 name="includeIds"
                 checked={!includeIds}
-                onChange={_ => setIncludeIds(false)}
+                onChange={(_) => setIncludeIds(false)}
               />
             </Col>
           </Row>
 
           <Row className="mb-3">
             <Col xs={3}>
-              <FormLabel>Number of Blank Scorecards{GroupFormat.Blank != groupFormat && " Per Group"}</FormLabel>
+              <FormLabel>
+                Number of Blank Scorecards
+                {GroupFormat.Blank != groupFormat && " Per Group"}
+              </FormLabel>
               <FormControl
                 type="number"
-                onChange={e => setValue(e, setNumBlanksPerGroup)}
+                onChange={(e) => setValue(e, setNumBlanksPerGroup)}
                 value={numBlanksPerGroup}
                 min={0}
               />
@@ -290,38 +326,50 @@ const App = () => {
 
           <h3>Competitors</h3>
           <Row className="mb-3">
-            {includeIds &&
+            {includeIds && (
               <Col xs={1}>
                 <FormLabel>ID</FormLabel>
                 <FormControl
                   type="number"
-                  onChange={e => setCurrentCompetitor(c => ({ ...c, id: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setCurrentCompetitor((c) => ({
+                      ...c,
+                      id: Number(e.target.value),
+                    }))
+                  }
                   value={currentCompetitor.id}
                   min={1}
                 />
               </Col>
-            }
-            {isManualGroups() &&
+            )}
+            {isManualGroups() && (
               <Col xs={1}>
                 <FormLabel>Group</FormLabel>
                 <FormControl
                   type="number"
-                  onChange={e => setCurrentCompetitor(c => ({ ...c, group: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setCurrentCompetitor((c) => ({
+                      ...c,
+                      group: Number(e.target.value),
+                    }))
+                  }
                   value={currentCompetitor.group}
                   min={1}
                 />
               </Col>
-            }
+            )}
             <Col xs={competitorNameColSize()}>
               <FormLabel>Competitor Name</FormLabel>
               <FormControl
                 type="text"
-                onChange={e => setCurrentCompetitor(c => ({ ...c, name: e.target.value }))}
+                onChange={(e) =>
+                  setCurrentCompetitor((c) => ({ ...c, name: e.target.value }))
+                }
                 value={currentCompetitor.name}
                 placeholder={competitorNamePlaceholder}
                 onKeyDown={(e) => {
                   if ("Enter" == e.key && currentCompetitor.name.length > 0) {
-                    addCompetitor()
+                    addCompetitor();
                   }
                 }}
               />
@@ -346,7 +394,7 @@ const App = () => {
       </Container>
 
       <Container className="mt-4">
-        {competitors.length > 0 &&
+        {competitors.length > 0 && (
           <Table striped bordered hover>
             <thead>
               <tr>
@@ -357,7 +405,7 @@ const App = () => {
               </tr>
             </thead>
             <tbody>
-              {competitors.map((c, i) =>
+              {competitors.map((c, i) => (
                 <tr key={i}>
                   {includeIds && <td>{c.id}</td>}
                   {isManualGroups() && <td>{c.group}</td>}
@@ -368,8 +416,8 @@ const App = () => {
                       variant="warning"
                       size="sm"
                       onClick={() => {
-                        setCurrentCompetitor(competitors[i])
-                        setCurrentCompetitorIdx(i)
+                        setCurrentCompetitor(competitors[i]);
+                        setCurrentCompetitorIdx(i);
                       }}
                     >
                       Edit
@@ -378,19 +426,48 @@ const App = () => {
                       variant="danger"
                       size="sm"
                       onClick={() => {
-                        deleteCompetitor(i)
-                        setCurrentCompetitorIdx(curr => curr - 1)
+                        deleteCompetitor(i);
+                        setCurrentCompetitorIdx((curr) => curr - 1);
                       }}
                     >
                       Delete
                     </Button>
                   </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </Table>
-        }
+        )}
       </Container>
+
+      <Container>
+        <Button
+          variant="success"
+          size="lg"
+          onClick={() => {
+            const data: ScorecardData = {
+              competition,
+              event,
+              round,
+              numAttempts,
+              hasCutoff,
+              cutoffMinutes,
+              cutoffSeconds,
+              timeLimitMinutes,
+              timeLimitSeconds,
+              groupFormat,
+              numBlanksPerGroup,
+              numGroups,
+              competitors,
+            };
+            generateScorecards(data);
+          }}
+        >
+          Generate Scorecards
+        </Button>
+      </Container>
+
+      <ScorecardGeneratorCopyright className="mt-4" />
 
       <Modal show={showBulkEntry} onHide={() => setShowBulkEntry(false)}>
         <ModalHeader closeButton>
@@ -402,9 +479,9 @@ const App = () => {
           <FormControl
             as="textarea"
             rows={4}
-            placeholder='Competitor Names Here'
+            placeholder="Competitor Names Here"
             value={bulkNames}
-            onChange={e => setValue(e, setBulkNames)}
+            onChange={(e) => setValue(e, setBulkNames)}
           />
         </ModalBody>
 
@@ -418,7 +495,7 @@ const App = () => {
         </ModalFooter>
       </Modal>
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;
