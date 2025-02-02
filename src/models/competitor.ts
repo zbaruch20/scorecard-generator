@@ -1,11 +1,13 @@
 export default interface Competitor {
-  id: number
+  regId: number
+  wcaId: string
   name: string
   group: number
 }
 
 export const newCompetitor: () => Competitor = () => ({
-  id: 1,
+  regId: 0,
+  wcaId: '',
   name: '',
   group: 1
 })

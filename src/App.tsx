@@ -23,10 +23,11 @@ import ScorecardData from "./models/scorecard-data";
 import generateScorecards from "./services/scorecard-service";
 import ScorecardGeneratorCopyright from "./components/copyright";
 import ScorecardGeneratorNavbar from "./components/navbar";
+import { CURRENT_YEAR, NEW_COMPETITOR } from "./services/utils";
 
 const App = () => {
   const [competition, setCompetition] = useState<string>(
-    `My Competition ${new Date().getFullYear()}`
+    `My Competition ${CURRENT_YEAR}`
   );
   const [event, setEvent] = useState<string>("My Event");
   const [round, setRound] = useState<number>(1);
@@ -55,6 +56,8 @@ const App = () => {
   const [bulkNames, setBulkNames] = useState<string>("");
   const [competitors, setCompetitors] = useState<Competitor[]>([]);
 
+  const [showDeleteAll, setShowDeleteAll] = useState<boolean>(false);
+
   const setValue = (
     e: any,
     setFunc: React.Dispatch<React.SetStateAction<any>>
@@ -66,14 +69,14 @@ const App = () => {
 
   const competitorNameColSize = () => {
     if (!includeIds && !isManualGroups()) {
-      return 12;
+      return 10;
     } else if (
       (includeIds && !isManualGroups()) ||
       (!includeIds && isManualGroups())
     ) {
-      return 11;
+      return 9;
     } else {
-      return 10;
+      return 8;
     }
   };
 
@@ -81,6 +84,7 @@ const App = () => {
     competitors.length > 0 ? randomName() : "My Competitor";
 
   const addCompetitor = () => {
+    if (!currentCompetitor.wcaId) currentCompetitor.wcaId = NEW_COMPETITOR;
     setCompetitors((competitors) => {
       competitors[currentCompetitorIdx] = currentCompetitor;
       setCurrentCompetitorIdx(competitors.length);
@@ -89,11 +93,19 @@ const App = () => {
     });
     setCurrentCompetitor(newCompetitor());
   };
+  const addCompetitorOnEnter = (e: React.KeyboardEvent<any>) => {
+    if ("Enter" == e.key && currentCompetitor.name.length > 0) {
+      addCompetitor();
+    }
+  };
 
   const addBulkCompetitors = () => {
-    const newCompetitors = bulkNames
-      .split(/\n/)
-      .map((n) => ({ name: n } as Competitor));
+    const newCompetitors = bulkNames.split(/\n/).map((n) => {
+      const nameAndId = n.split(/\s*\|\s*/);
+      const wcaId = nameAndId[1] || NEW_COMPETITOR
+      console.log("WCA ID: ", wcaId)
+      return { name: nameAndId[0], wcaId } as Competitor;
+    });
     if (competitors.length === currentCompetitorIdx) {
       setCurrentCompetitorIdx((curr) => curr + newCompetitors.length);
     }
@@ -285,7 +297,7 @@ const App = () => {
             </Col>
 
             <Col xs={6}>
-              <FormLabel className="mx-3">Include Competitor IDs?</FormLabel>
+              <FormLabel className="mx-3">Include Registrant IDs?</FormLabel>
               <FormCheck
                 inline
                 type="radio"
@@ -334,10 +346,10 @@ const App = () => {
                   onChange={(e) =>
                     setCurrentCompetitor((c) => ({
                       ...c,
-                      id: Number(e.target.value),
+                      regId: Number(e.target.value),
                     }))
                   }
-                  value={currentCompetitor.id}
+                  value={currentCompetitor.regId}
                   min={1}
                 />
               </Col>
@@ -358,6 +370,18 @@ const App = () => {
                 />
               </Col>
             )}
+            <Col xs={2}>
+              <FormLabel>WCA ID</FormLabel>
+              <FormControl
+                type="text"
+                onChange={(e) =>
+                  setCurrentCompetitor((c) => ({ ...c, wcaId: e.target.value }))
+                }
+                value={currentCompetitor.wcaId}
+                placeholder="Leave blank if no ID"
+                onKeyDown={addCompetitorOnEnter}
+              />
+            </Col>
             <Col xs={competitorNameColSize()}>
               <FormLabel>Competitor Name</FormLabel>
               <FormControl
@@ -367,11 +391,7 @@ const App = () => {
                 }
                 value={currentCompetitor.name}
                 placeholder={competitorNamePlaceholder}
-                onKeyDown={(e) => {
-                  if ("Enter" == e.key && currentCompetitor.name.length > 0) {
-                    addCompetitor();
-                  }
-                }}
+                onKeyDown={addCompetitorOnEnter}
               />
             </Col>
           </Row>
@@ -379,7 +399,7 @@ const App = () => {
 
         <Button
           variant="primary"
-          disabled={currentCompetitor.name.length == 0}
+          disabled={currentCompetitor.name.length === 0}
           onClick={addCompetitor}
         >
           Add Competitor
@@ -391,6 +411,13 @@ const App = () => {
         >
           Bulk Entry
         </Button>
+        <Button
+          variant="outline-danger"
+          disabled={competitors.length === 0}
+          onClick={() => setShowDeleteAll(true)}
+        >
+          Delete All Competitors
+        </Button>
       </Container>
 
       <Container className="mt-4">
@@ -400,6 +427,7 @@ const App = () => {
               <tr>
                 {includeIds && <th>ID</th>}
                 {isManualGroups() && <th>Group</th>}
+                <th>WCA ID</th>
                 <th>Competitor Name</th>
                 <th>Modify?</th>
               </tr>
@@ -407,8 +435,9 @@ const App = () => {
             <tbody>
               {competitors.map((c, i) => (
                 <tr key={i}>
-                  {includeIds && <td>{c.id}</td>}
+                  {includeIds && <td>{c.regId}</td>}
                   {isManualGroups() && <td>{c.group}</td>}
+                  <td>{c.wcaId}</td>
                   <td>{c.name}</td>
                   <td>
                     <Button
@@ -475,7 +504,10 @@ const App = () => {
         </ModalHeader>
 
         <ModalBody>
-          <FormLabel>Enter a list of competitors, one name per line:</FormLabel>
+          <FormLabel>
+            Enter a list of competitors, one name per line. To include WCA IDs,
+            use the format <code>Name | ID</code>.
+          </FormLabel>
           <FormControl
             as="textarea"
             rows={4}
@@ -491,6 +523,28 @@ const App = () => {
           </Button>
           <Button variant="primary" onClick={addBulkCompetitors}>
             Add Competitors
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      <Modal show={showDeleteAll} onHide={() => setShowDeleteAll(false)}>
+        <ModalBody>
+          Are you sure? This will delete <strong>ALL</strong> competitors! This
+          action cannot be undone.
+        </ModalBody>
+        <ModalFooter>
+          <Button variant="secondary" onClick={() => setShowDeleteAll(false)}>
+            Close
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              setCompetitors([]);
+              setCompetitorNamePlaceholder("My Competitor")
+              setShowDeleteAll(false);
+            }}
+          >
+            Yes, delete all competitors
           </Button>
         </ModalFooter>
       </Modal>
