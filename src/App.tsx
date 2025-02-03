@@ -19,7 +19,7 @@ import {
 import Competitor, { newCompetitor } from "./models/competitor";
 import GroupFormat, { GroupFormatStrings } from "./models/group-format";
 import { randomName } from "./models/sample-names";
-import ScorecardData from "./models/scorecard-data";
+import ScorecardGeneratorData from "./models/scorecard-generator-data";
 import generateScorecards from "./services/scorecard-service";
 import ScorecardGeneratorCopyright from "./components/copyright";
 import ScorecardGeneratorNavbar from "./components/navbar";
@@ -157,7 +157,7 @@ const App = () => {
   const OptionalNumGroupsForm = () => {
     return (
       <>
-        {GroupFormat.Random == groupFormat && (
+        {GroupFormat.Blank != groupFormat && (
           <Col xs={3}>
             <FormLabel>Number of Groups</FormLabel>
             <FormControl
@@ -289,8 +289,13 @@ const App = () => {
                     label={format}
                     name="groupFormat"
                     checked={groupFormat == format}
-                    onChange={(_) =>
-                      setGroupFormat(GroupFormat[format as GroupFormatStrings])
+                    onChange={(_) => {
+                      const gf = GroupFormat[format as GroupFormatStrings]
+                      setGroupFormat(gf)
+                      if (GroupFormat.Blank == gf) {
+                        setNumGroups(1)
+                      }
+                    }
                     }
                   />
                 ))}
@@ -474,7 +479,7 @@ const App = () => {
           variant="success"
           size="lg"
           onClick={() => {
-            const data: ScorecardData = {
+            const data: ScorecardGeneratorData = {
               competition,
               event,
               round,
