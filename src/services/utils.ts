@@ -1,10 +1,13 @@
+import { Content } from "pdfmake/interfaces";
+import PdfNameProps from "../models/pdf-name-props";
+
 export const CURRENT_YEAR = new Date().getFullYear();
 export const NEW_COMPETITOR = "New competitor";
 
 export const pdfName = (
   name: string,
-  { swapLatinWithLocalNames = false, short = false } = {}
-) => {
+  { swapLatinWithLocalNames, short }: PdfNameProps = {} as PdfNameProps
+): Content => {
   /* Note: support normal and fullwidth parentheses. */
   const [, latinName, localName] = name.match(/(.+)\s*[(（](.+)[)）]/) || [
     null,
@@ -12,7 +15,7 @@ export const pdfName = (
     null,
   ];
   if (!localName) return latinName;
-  const pdfNames = [
+  const pdfNames: [string, Content] = [
     latinName,
     { text: localName, font: determineFont(localName) },
   ];
