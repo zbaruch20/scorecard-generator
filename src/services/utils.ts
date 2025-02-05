@@ -61,3 +61,9 @@ export const chunk = <T>(arr: T[], size: number): T[][] => {
 export const times = <T>(n: number, fn: (x: number) => T): T[] => {
   return Array.from({ length: n }, (_, i) => fn(i));
 };
+
+export const slugify = (s: string) =>
+  s
+    .replace(/['.:&]/g, "")
+    .toLocaleLowerCase()
+    .replace(/\s+(-+\s+)+|\s+/g, "-");

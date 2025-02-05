@@ -3,7 +3,8 @@ import Competitor, { newCompetitor } from "../models/competitor";
 import GroupFormat from "../models/group-format";
 import ScorecardGeneratorData from "../models/scorecard-generator-data";
 import ScorecardPaperSizeInfo from "../models/scorecard-paper-size-info";
-import pdfMake from "./pdfmake";
+import pdfMakeSG from "./pdfmake";
+import { slugify } from "./utils";
 
 // Scorecard generation adapted from Groupfier by Jonatan Kłosko https://github.com/jonatanklosko/groupifier
 
@@ -39,7 +40,7 @@ const generateScorecards = (data: ScorecardGeneratorData): void => {
   const definition = scorecardsPdfDefinition(processCompetitors(data));
 
   console.log("generateScorecards() called at: ", new Date());
-  pdfMake.createPdf(definition).open();
+  pdfMakeSG.createPdf(definition).open();
 };
 
 const processCompetitors = (
@@ -57,8 +58,8 @@ const processCompetitors = (
 
 // TODO - maybe try doing full random
 const assignGroups = (competitors: Competitor[], numGroups: number): void => {
-  for (let i = 1; i <= competitors.length; i++) {
-    competitors[i].group = (i % numGroups) + 1;
+  for (let i = 0; i < competitors.length; i++) {
+    competitors[i].group = (i + 1 % numGroups) + 1;
   }
 };
 
@@ -67,8 +68,8 @@ const addBlanks = (
   numBlanksPerGroup: number,
   numGroups: number
 ): void => {
-  for (let i = 1; i <= numBlanksPerGroup * numGroups; i++) {
-    competitors.push({ ...newCompetitor(), group: (i % numGroups) + 1 });
+  for (let i = 0; i < numBlanksPerGroup * numGroups; i++) {
+    competitors.push({ ...newCompetitor(), group: (i + 1 % numGroups) + 1 });
   }
 };
 
@@ -81,6 +82,9 @@ const scorecardsPdfDefinition = (
   data: ScorecardGeneratorData
 ): TDocumentDefinitions => {
   return {
+    info: {
+      title: slugify(`${data.event}-round-${data.round}-scorecards-${data.competition}`)
+    },
     content: "hello world",
   };
 };

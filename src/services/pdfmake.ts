@@ -30,4 +30,5 @@ pdfMake.fonts = {
   NotoSansKannada: singleFileFont('NotoSansKannada-Regular.ttf'),
 };
 
-export default pdfMake;
+const pdfMakeSG = pdfMake;
+export default pdfMakeSG;
