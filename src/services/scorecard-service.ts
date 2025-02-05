@@ -1,15 +1,19 @@
 import {
   CanvasLine,
-  CanvasLineElement,
+  Column,
+  Content,
   ContentCanvas,
+  StyleReference,
   TDocumentDefinitions,
+  TableCell,
+  TableCellProperties,
 } from "pdfmake/interfaces";
 import Competitor, { newCompetitor } from "../models/competitor";
 import GroupFormat from "../models/group-format";
 import ScorecardGeneratorData from "../models/scorecard-generator-data";
 import ScorecardPaperSizeInfo from "../models/scorecard-paper-size-info";
 import pdfMakeSG from "./pdfmake";
-import { slugify } from "./utils";
+import { slugify, times } from "./utils";
 
 // Scorecard generation adapted from Groupfier by Jonatan Kłosko https://github.com/jonatanklosko/groupifier
 
@@ -129,6 +133,128 @@ const scorecardsPdfDefinition = (
     content: "hello world",
   };
 };
+
+const scorecardList = (data: ScorecardGeneratorData) => {
+  const paperInfo = scorecardPaperSizeInfos[data.paperSize];
+
+  return data.competitors.map((c, num) => {});
+};
+
+const scorecardContent = (
+  competitor: Competitor,
+  num: number,
+  { pageWidth, pageHeight, horizontalMargin }: ScorecardPaperSizeInfo,
+  {
+    competition,
+    event,
+    round,
+    hasCutoff,
+    cutoffMinutes,
+    cutoffSeconds,
+    timeLimitMinutes,
+    timeLimitSeconds,
+  }: ScorecardGeneratorData
+): Content => [
+  {
+    fontSize: 10,
+    text: num + 1,
+    alignment: "left",
+  },
+  {
+    text: competition,
+    bold: true,
+    fontSize: 15,
+    marginBottom: 10,
+    alignment: "center",
+  },
+  {
+    marginLeft: 25,
+    table: {
+      widths: ["*", 30, 30],
+      body: [],
+    },
+  },
+];
+
+const columnLabels = (
+  labels: TableCell[],
+  style?: StyleReference
+): TableCell[] => {
+  return labels.map((label) => ({
+    style,
+    ...noBorder,
+    fontSize: 9,
+    ...(Array.isArray(label) ? { columns: label } : { text: label }),
+  }));
+};
+
+const attemptRows = (
+  hasCutoff: boolean,
+  numAttempts: number,
+  scorecardWidth: number
+) => {
+  const numCutoffAttempts = numAttempts <= 3 ? 1 : 2;
+
+  return times(numAttempts, (attemptIndex) =>
+    attemptRow(attemptIndex + 1)
+  ).reduce(
+    (rows, attemptRow, attemptIndex) =>
+      attemptIndex + 1 === numAttempts
+        ? [...rows, attemptRow]
+        : [
+            ...rows,
+            attemptRow,
+            attemptsSeparator(
+              hasCutoff && attemptIndex + 1 === numCutoffAttempts,
+              scorecardWidth
+            ),
+          ],
+    []
+  );
+};
+
+const attemptsSeparator = (
+  cutoffLine: boolean,
+  scorecardWidth: number
+): TableCell[] => [
+  {
+    ...noBorder,
+    colSpan: 5,
+    margin: [0, 1],
+    columns: !cutoffLine
+      ? []
+      : [
+          {
+            canvas: [
+              {
+                type: "line",
+                x1: 0,
+                y1: 0,
+                x2: scorecardWidth,
+                y2: 0,
+                dash: { length: 5 },
+              },
+            ],
+          },
+        ],
+  },
+];
+
+const attemptRow = (attemptNumber: number): TableCell[] => [
+  {
+    text: attemptNumber,
+    ...noBorder,
+    fontSize: 20,
+    bold: true,
+    alignment: "center",
+  },
+  {},
+  {},
+  {},
+  {},
+];
+
+const noBorder: TableCellProperties = { border: [false, false, false, false] };
 
 const cutLine = (properties: CanvasLine): CanvasLine => ({
   ...properties,

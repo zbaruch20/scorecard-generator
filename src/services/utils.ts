@@ -58,9 +58,11 @@ export const chunk = <T>(arr: T[], size: number): T[][] => {
     : [arr.slice(0, size), ...chunk(arr.slice(size), size)];
 };
 
-export const times = <T>(n: number, fn: (x: number) => T): T[] => {
-  return Array.from({ length: n }, (_, i) => fn(i));
-};
+export const times = <T>(n: number, fn: (x: number) => T): T[] =>
+  Array.from({ length: n }, (_, i) => fn(i));
+
+// export const flatMap = <T, U>(arr: T[], fn: (x: T) => U[]): U[] =>
+//   arr.reduce<U[]>((acc, curr) => acc.concat(fn(curr)), []);
 
 export const slugify = (s: string) =>
   s
