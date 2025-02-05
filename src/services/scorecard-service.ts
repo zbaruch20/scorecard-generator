@@ -1,4 +1,9 @@
-import { TDocumentDefinitions } from "pdfmake/interfaces";
+import {
+  CanvasLine,
+  CanvasLineElement,
+  ContentCanvas,
+  TDocumentDefinitions,
+} from "pdfmake/interfaces";
 import Competitor, { newCompetitor } from "../models/competitor";
 import GroupFormat from "../models/group-format";
 import ScorecardGeneratorData from "../models/scorecard-generator-data";
@@ -48,10 +53,10 @@ const processCompetitors = (
 ): ScorecardGeneratorData => {
   const competitors = [...data.competitors]; // make a copy
   if (GroupFormat.Random == data.groupFormat) {
-    assignGroups(data.competitors, data.numGroups);
+    assignGroups(competitors, data.numGroups);
   }
-  addBlanks(data.competitors, data.numBlanksPerGroup, data.numGroups);
-  sortByGroups(data.competitors);
+  addBlanks(competitors, data.numBlanksPerGroup, data.numGroups);
+  sortByGroups(competitors);
 
   return { ...data, competitors };
 };
@@ -59,7 +64,7 @@ const processCompetitors = (
 // TODO - maybe try doing full random
 const assignGroups = (competitors: Competitor[], numGroups: number): void => {
   for (let i = 0; i < competitors.length; i++) {
-    competitors[i].group = (i + 1 % numGroups) + 1;
+    competitors[i].group = i + (1 % numGroups) + 1;
   }
 };
 
@@ -69,7 +74,7 @@ const addBlanks = (
   numGroups: number
 ): void => {
   for (let i = 0; i < numBlanksPerGroup * numGroups; i++) {
-    competitors.push({ ...newCompetitor(), group: (i + 1 % numGroups) + 1 });
+    competitors.push({ ...newCompetitor(), group: i + (1 % numGroups) + 1 });
   }
 };
 
@@ -81,12 +86,56 @@ const sortByGroups = (competitors: Competitor[]): void => {
 const scorecardsPdfDefinition = (
   data: ScorecardGeneratorData
 ): TDocumentDefinitions => {
+  const {
+    pageWidth,
+    pageHeight,
+    scorecardsPerRow,
+    scorecardsPerPage,
+    horizontalMargin,
+    verticalMargin,
+  } = scorecardPaperSizeInfos[data.paperSize];
+
+  const cutLines: ContentCanvas = {
+    canvas:
+      scorecardsPerPage === 4
+        ? [
+            cutLine({
+              type: "line",
+              x1: horizontalMargin,
+              y1: pageHeight / 2,
+              x2: pageWidth - horizontalMargin,
+              y2: pageHeight / 2,
+            }),
+            cutLine({
+              type: "line",
+              x1: pageWidth / 2,
+              y1: verticalMargin,
+              x2: pageWidth / 2,
+              y2: pageHeight - verticalMargin,
+            }),
+          ]
+        : [],
+  };
+
   return {
     info: {
-      title: slugify(`${data.event}-round-${data.round}-scorecards-${data.competition}`)
+      title: slugify(
+        `${data.event}-round-${data.round}-scorecards-${data.competition}`
+      ),
     },
+    background: cutLines,
+    pageSize: { width: pageWidth, height: pageHeight },
+    pageMargins: [horizontalMargin, verticalMargin],
     content: "hello world",
   };
 };
+
+const cutLine = (properties: CanvasLine): CanvasLine => ({
+  ...properties,
+  type: "line",
+  lineWidth: 0.1,
+  dash: { length: 10 },
+  lineColor: "#888888",
+});
 
 export default generateScorecards;
