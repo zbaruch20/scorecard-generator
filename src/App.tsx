@@ -24,6 +24,7 @@ import generateScorecards from "./services/scorecard-service";
 import ScorecardGeneratorCopyright from "./components/copyright";
 import ScorecardGeneratorNavbar from "./components/navbar";
 import { CURRENT_YEAR, NEW_COMPETITOR } from "./services/utils";
+import PaperSize, { PaperSizeStrings } from "./models/paper-sizes";
 
 const App = () => {
   const [competition, setCompetition] = useState<string>(
@@ -32,6 +33,8 @@ const App = () => {
   const [event, setEvent] = useState<string>("My Event");
   const [round, setRound] = useState<number>(1);
   const [numAttempts, setNumAttempts] = useState<number>(5);
+  const [paperSize, setPaperSize] = useState<PaperSize>(PaperSize.Letter);
+
   const [hasCutoff, setHasCutoff] = useState<boolean>(false);
   const [cutoffMinutes, setCutoffMinutes] = useState<number>(0);
   const [cutoffSeconds, setCutoffSeconds] = useState<number>(0);
@@ -93,7 +96,7 @@ const App = () => {
     });
     setCurrentCompetitor(newCompetitor());
   };
-  
+
   const addCompetitorOnEnter = (e: React.KeyboardEvent<any>) => {
     if ("Enter" == e.key && currentCompetitor.name.length > 0) {
       addCompetitor();
@@ -103,8 +106,8 @@ const App = () => {
   const addBulkCompetitors = () => {
     const newCompetitors = bulkNames.split(/\n/).map((n) => {
       const nameAndId = n.split(/\s*\|\s*/);
-      const wcaId = nameAndId[1] || NEW_COMPETITOR
-      console.log("WCA ID: ", wcaId)
+      const wcaId = nameAndId[1] || NEW_COMPETITOR;
+      console.log("WCA ID: ", wcaId);
       return { name: nameAndId[0], wcaId } as Competitor;
     });
     if (competitors.length === currentCompetitorIdx) {
@@ -291,13 +294,12 @@ const App = () => {
                     name="groupFormat"
                     checked={groupFormat == format}
                     onChange={(_) => {
-                      const gf = GroupFormat[format as GroupFormatStrings]
-                      setGroupFormat(gf)
+                      const gf = GroupFormat[format as GroupFormatStrings];
+                      setGroupFormat(gf);
                       if (GroupFormat.Blank == gf) {
-                        setNumGroups(1)
+                        setNumGroups(1);
                       }
-                    }
-                    }
+                    }}
                   />
                 ))}
             </Col>
@@ -319,6 +321,28 @@ const App = () => {
                 checked={!includeIds}
                 onChange={(_) => setIncludeIds(false)}
               />
+            </Col>
+          </Row>
+
+          <Row>
+            <Col xs={6}>
+              <FormLabel className="me-3">Paper Size</FormLabel>
+              {Object.keys(PaperSize)
+                .filter((k) => isNaN(Number(k)))
+                .map((size: string, i) => {
+                  const sz = PaperSize[size as PaperSizeStrings];
+                  return (
+                    <FormCheck
+                      key={i}
+                      inline
+                      type="radio"
+                      label={size}
+                      name="paperSize"
+                      checked={paperSize == sz}
+                      onChange={(_) => setPaperSize(sz)}
+                    />
+                  );
+                })}
             </Col>
           </Row>
 
@@ -485,6 +509,7 @@ const App = () => {
               event,
               round,
               numAttempts,
+              paperSize,
               hasCutoff,
               cutoffMinutes,
               cutoffSeconds,
@@ -546,7 +571,7 @@ const App = () => {
             variant="danger"
             onClick={() => {
               setCompetitors([]);
-              setCompetitorNamePlaceholder("My Competitor")
+              setCompetitorNamePlaceholder("My Competitor");
               setShowDeleteAll(false);
             }}
           >

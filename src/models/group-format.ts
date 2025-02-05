@@ -1,9 +1,9 @@
 enum GroupFormat {
   Random = "Random",
   Manual = "Manual",
-  Blank = "Blank"
+  Blank = "Blank",
 }
 
-export default GroupFormat
+export default GroupFormat;
 
-export type GroupFormatStrings = keyof typeof GroupFormat
+export type GroupFormatStrings = keyof typeof GroupFormat;
