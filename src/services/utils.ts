@@ -1,6 +1,27 @@
 export const CURRENT_YEAR = new Date().getFullYear();
 export const NEW_COMPETITOR = "New competitor";
 
+export const pdfName = (
+  name: string,
+  { swapLatinWithLocalNames = false, short = false } = {}
+) => {
+  /* Note: support normal and fullwidth parentheses. */
+  const [, latinName, localName] = name.match(/(.+)\s*[(（](.+)[)）]/) || [
+    null,
+    name,
+    null,
+  ];
+  if (!localName) return latinName;
+  const pdfNames = [
+    latinName,
+    { text: localName, font: determineFont(localName) },
+  ];
+  const [first, second] = swapLatinWithLocalNames
+    ? pdfNames.reverse()
+    : pdfNames;
+  return short ? first : [first, " (", second, ")"];
+};
+
 const determineFont = (text: string) => {
   const code = text.charCodeAt(0);
   /* Based on https://en.wikipedia.org/wiki/Unicode_block */
@@ -24,27 +45,6 @@ const determineFont = (text: string) => {
     /* Default to WenQuanYiZenHei as it supports the most characters (mostly CJK). */
     return "WenQuanYiZenHei";
   }
-};
-
-export const pdfName = (
-  name: string,
-  { swapLatinWithLocalNames = false, short = false } = {}
-) => {
-  /* Note: support normal and fullwidth parentheses. */
-  const [, latinName, localName] = name.match(/(.+)\s*[(（](.+)[)）]/) || [
-    null,
-    name,
-    null,
-  ];
-  if (!localName) return latinName;
-  const pdfNames = [
-    latinName,
-    { text: localName, font: determineFont(localName) },
-  ];
-  const [first, second] = swapLatinWithLocalNames
-    ? pdfNames.reverse()
-    : pdfNames;
-  return short ? first : [first, " (", second, ")"];
 };
 
 export const inRange = (x: number, a: number, b: number) => a <= x && x <= b;
