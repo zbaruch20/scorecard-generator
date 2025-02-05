@@ -48,9 +48,10 @@ const processCompetitors = (data: ScorecardGeneratorData): Competitor[] => {
   return competitors;
 };
 
+// TODO - maybe try doing full random
 const assignGroups = (competitors: Competitor[], numGroups: number): void => {
-  for (let i = 0; i < competitors.length; i++) {
-    competitors[i].group = (i + 1) % numGroups;
+  for (let i = 1; i <= competitors.length; i++) {
+    competitors[i].group = (i % numGroups) + 1;
   }
 };
 
@@ -59,8 +60,8 @@ const addBlanks = (
   numBlanksPerGroup: number,
   numGroups: number
 ): void => {
-  for (let i = 0; i < numBlanksPerGroup * numGroups; i++) {
-    competitors.push({ ...newCompetitor(), group: (i + 1) % numGroups });
+  for (let i = 1; i <= numBlanksPerGroup * numGroups; i++) {
+    competitors.push({ ...newCompetitor(), group: (i % numGroups) + 1 });
   }
 };
 
