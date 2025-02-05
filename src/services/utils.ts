@@ -1,3 +1,6 @@
+export const CURRENT_YEAR = new Date().getFullYear();
+export const NEW_COMPETITOR = "New competitor";
+
 const determineFont = (text: string) => {
   const code = text.charCodeAt(0);
   /* Based on https://en.wikipedia.org/wiki/Unicode_block */
@@ -45,7 +48,3 @@ export const pdfName = (
 };
 
 export const inRange = (x: number, a: number, b: number) => a <= x && x <= b;
-
-export const CURRENT_YEAR = new Date().getFullYear();
-
-export const NEW_COMPETITOR = "New competitor";
