@@ -13,7 +13,7 @@ import GroupFormat from "../models/group-format";
 import ScorecardGeneratorData from "../models/scorecard-generator-data";
 import ScorecardPaperSizeInfo from "../models/scorecard-paper-size-info";
 import pdfMakeSG from "./pdfmake";
-import { slugify, times } from "./utils";
+import { chunk, slugify, times } from "./utils";
 
 // Scorecard generation adapted from Groupfier by Jonatan Kłosko https://github.com/jonatanklosko/groupifier
 
@@ -68,7 +68,7 @@ const processCompetitors = (
 // TODO - maybe try doing full random
 const assignGroups = (competitors: Competitor[], numGroups: number): void => {
   for (let i = 0; i < competitors.length; i++) {
-    competitors[i].group = i + (1 % numGroups) + 1;
+    competitors[i].group = (i + 1) % numGroups + 1;
   }
 };
 
@@ -78,7 +78,7 @@ const addBlanks = (
   numGroups: number
 ): void => {
   for (let i = 0; i < numBlanksPerGroup * numGroups; i++) {
-    competitors.push({ ...newCompetitor(), group: i + (1 % numGroups) + 1 });
+    competitors.push({ ...newCompetitor(), group: (i + 1) % numGroups + 1 });
   }
 };
 
@@ -130,14 +130,35 @@ const scorecardsPdfDefinition = (
     background: cutLines,
     pageSize: { width: pageWidth, height: pageHeight },
     pageMargins: [horizontalMargin, verticalMargin],
-    content: "hello world",
+    content: {
+      layout: {
+        /* Outer margin is done using pageMargins, we use padding for the remaining inner margins. */
+        paddingLeft: (i) => (i % scorecardsPerRow === 0 ? 0 : horizontalMargin),
+        paddingRight: (i) =>
+          i % scorecardsPerRow === scorecardsPerRow - 1 ? 0 : horizontalMargin,
+        paddingTop: (i) => (i % scorecardsPerRow === 0 ? 0 : verticalMargin),
+        paddingBottom: (i) =>
+          i % scorecardsPerRow === scorecardsPerRow - 1 ? 0 : verticalMargin,
+        /* Get rid of borders. */
+        hLineWidth: () => 0,
+        vLineWidth: () => 0,
+      },
+      table: {
+        widths: Array(scorecardsPerPage).fill("*"),
+        heights: pageHeight / scorecardsPerRow - 2 * verticalMargin,
+        dontBreakRows: true,
+        body: chunk(scorecardList(data), scorecardsPerRow),
+      },
+    },
   };
 };
 
-const scorecardList = (data: ScorecardGeneratorData) => {
+const scorecardList = (data: ScorecardGeneratorData): Content[] => {
   const paperInfo = scorecardPaperSizeInfos[data.paperSize];
 
-  return data.competitors.map((c, num) => {});
+  return data.competitors.map((c, num) =>
+    scorecardContent(c, num, paperInfo, data)
+  );
 };
 
 const scorecardContent = (
@@ -171,7 +192,18 @@ const scorecardContent = (
     marginLeft: 25,
     table: {
       widths: ["*", 30, 30],
-      body: [],
+      body: [
+        columnLabels([
+          "Event",
+          { text: "Round", alignment: "center" },
+          { text: "Group", alignment: "center" },
+        ]),
+        [
+          event,
+          { text: round, alignment: "center" },
+          { text: competitor.group, alignment: "center" },
+        ],
+      ],
     },
   },
 ];

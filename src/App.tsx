@@ -107,8 +107,7 @@ const App = () => {
     const newCompetitors = bulkNames.split(/\n/).map((n) => {
       const nameAndId = n.split(/\s*\|\s*/);
       const wcaId = nameAndId[1] || NEW_COMPETITOR;
-      console.log("WCA ID: ", wcaId);
-      return { name: nameAndId[0], wcaId } as Competitor;
+      return { name: nameAndId[0], wcaId, group: 0 } as Competitor;
     });
     if (competitors.length === currentCompetitorIdx) {
       setCurrentCompetitorIdx((curr) => curr + newCompetitors.length);
