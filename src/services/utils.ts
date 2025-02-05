@@ -48,3 +48,13 @@ export const pdfName = (
 };
 
 export const inRange = (x: number, a: number, b: number) => a <= x && x <= b;
+
+export const chunk = <T>(arr: T[], size: number): T[][] => {
+  return arr.length <= size
+    ? [arr]
+    : [arr.slice(0, size), ...chunk(arr.slice(size), size)];
+};
+
+export const times = <T>(n: number, fn: (x: number) => T): T[] => {
+  return Array.from({ length: n }, (_, i) => fn(i));
+};

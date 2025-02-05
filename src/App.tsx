@@ -93,6 +93,7 @@ const App = () => {
     });
     setCurrentCompetitor(newCompetitor());
   };
+  
   const addCompetitorOnEnter = (e: React.KeyboardEvent<any>) => {
     if ("Enter" == e.key && currentCompetitor.name.length > 0) {
       addCompetitor();
