@@ -5,7 +5,7 @@ fetch('/vfs-fonts.bundle.v3.json', { mode: 'same-origin' })
   .then(response => response.json())
   .then(vfsFonts => (pdfMake.vfs = vfsFonts));
 
-const singleFileFont = file => ({
+const singleFileFont = (file: any) => ({
   normal: file,
   bold: file,
   italic: file,

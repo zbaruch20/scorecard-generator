@@ -1,7 +1,9 @@
+import { TDocumentDefinitions } from "pdfmake/interfaces";
 import Competitor, { newCompetitor } from "../models/competitor";
 import GroupFormat from "../models/group-format";
 import ScorecardGeneratorData from "../models/scorecard-generator-data";
 import ScorecardPaperSizeInfo from "../models/scorecard-paper-size-info";
+import pdfMake from "./pdfmake";
 
 // Scorecard generation adapted from Groupfier by Jonatan Kłosko https://github.com/jonatanklosko/groupifier
 
@@ -34,18 +36,23 @@ const scorecardPaperSizeInfos: { [name: string]: ScorecardPaperSizeInfo } = {
 };
 
 const generateScorecards = (data: ScorecardGeneratorData): void => {
-  const competitors = processCompetitors(data);
+  const definition = scorecardsPdfDefinition(processCompetitors(data));
+
+  console.log("generateScorecards() called at: ", new Date());
+  pdfMake.createPdf(definition).open();
 };
 
-const processCompetitors = (data: ScorecardGeneratorData): Competitor[] => {
+const processCompetitors = (
+  data: ScorecardGeneratorData
+): ScorecardGeneratorData => {
   const competitors = [...data.competitors]; // make a copy
   if (GroupFormat.Random == data.groupFormat) {
-    assignGroups(competitors, data.numGroups);
+    assignGroups(data.competitors, data.numGroups);
   }
-  addBlanks(competitors, data.numBlanksPerGroup, data.numGroups);
-  sortByGroups(competitors);
+  addBlanks(data.competitors, data.numBlanksPerGroup, data.numGroups);
+  sortByGroups(data.competitors);
 
-  return competitors;
+  return { ...data, competitors };
 };
 
 // TODO - maybe try doing full random
@@ -67,6 +74,15 @@ const addBlanks = (
 
 const sortByGroups = (competitors: Competitor[]): void => {
   competitors.sort((a, b) => a.group - b.group || a.name.localeCompare(b.name));
+};
+
+// This assumes data.competitors has been properly processed (e.g. assigned groups and sorted)
+const scorecardsPdfDefinition = (
+  data: ScorecardGeneratorData
+): TDocumentDefinitions => {
+  return {
+    content: "hello world",
+  };
 };
 
 export default generateScorecards;
