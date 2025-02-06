@@ -13,7 +13,7 @@ import GroupFormat from "../models/group-format";
 import ScorecardGeneratorData from "../models/scorecard-generator-data";
 import ScorecardPaperSizeInfo from "../models/scorecard-paper-size-info";
 import pdfMakeSG from "./pdfmake";
-import { chunk, slugify, times } from "./utils";
+import { chunk, pdfName, slugify, times } from "./utils";
 
 // Scorecard generation adapted from Groupfier by Jonatan Kłosko https://github.com/jonatanklosko/groupifier
 
@@ -68,7 +68,7 @@ const processCompetitors = (
 // TODO - maybe try doing full random
 const assignGroups = (competitors: Competitor[], numGroups: number): void => {
   for (let i = 0; i < competitors.length; i++) {
-    competitors[i].group = (i + 1) % numGroups + 1;
+    competitors[i].group = ((i + 1) % numGroups) + 1;
   }
 };
 
@@ -78,7 +78,7 @@ const addBlanks = (
   numGroups: number
 ): void => {
   for (let i = 0; i < numBlanksPerGroup * numGroups; i++) {
-    competitors.push({ ...newCompetitor(), group: (i + 1) % numGroups + 1 });
+    competitors.push({ ...newCompetitor(), group: ((i + 1) % numGroups) + 1 });
   }
 };
 
@@ -144,7 +144,7 @@ const scorecardsPdfDefinition = (
         vLineWidth: () => 0,
       },
       table: {
-        widths: Array(scorecardsPerPage).fill("*"),
+        widths: "*",
         heights: pageHeight / scorecardsPerRow - 2 * verticalMargin,
         dontBreakRows: true,
         body: chunk(scorecardList(data), scorecardsPerRow),
@@ -164,11 +164,12 @@ const scorecardList = (data: ScorecardGeneratorData): Content[] => {
 const scorecardContent = (
   competitor: Competitor,
   num: number,
-  { pageWidth, pageHeight, horizontalMargin }: ScorecardPaperSizeInfo,
+  { pageWidth, horizontalMargin, scorecardsPerRow }: ScorecardPaperSizeInfo,
   {
     competition,
     event,
     round,
+    numAttempts,
     hasCutoff,
     cutoffMinutes,
     cutoffSeconds,
@@ -206,6 +207,70 @@ const scorecardContent = (
       ],
     },
   },
+  {
+    marginLeft: 25,
+    table: {
+      widths: [30, "*"],
+      body: [
+        columnLabels([
+          "ID",
+          [
+            { text: "Name", alignment: "left", width: "auto" },
+            { text: competitor.wcaId, alignment: "right" },
+          ],
+        ]),
+        [
+          { text: competitor.regId || " ", alignment: "center" },
+          {
+            text: pdfName(competitor.name || " "),
+            maxHeight: 20 /* See: https://github.com/bpampuch/pdfmake/issues/264#issuecomment-108347567 */,
+          },
+        ],
+      ],
+    },
+  },
+  {
+    marginTop: 10,
+    table: {
+      /* Note: 16 (width) + 4 + 4 (defult left and right padding) + 1 (left border) = 25 */
+      widths: [16, 25, "*", 25, 25],
+      body: [
+        columnLabels(["", "Scr", "Result", "Judge", "Comp"], {
+          alignment: "center",
+        }),
+        ...attemptRows(
+          hasCutoff,
+          numAttempts,
+          pageWidth / scorecardsPerRow - 2 * horizontalMargin
+        ),
+        [
+          {
+            text: "Extra" + " (" + "Delegate initials" + " _______)",
+            ...noBorder,
+            colSpan: 5,
+            margin: [0, 1],
+            fontSize: 10,
+          },
+        ],
+        attemptRow("_"),
+        [{ text: "", ...noBorder, colSpan: 5, margin: [0, 1] }],
+      ],
+    },
+  },
+  {
+    fontSize: 10,
+    columns: [
+      hasCutoff
+        ? {
+            text: `Cutoff: < ${cutoffMinutes}:${cutoffSeconds}.00`,
+            alignment: "center",
+          }
+        : ({} as Column),
+      {
+        text: `Time limit: ${timeLimitMinutes}:${timeLimitSeconds}.00`,
+      },
+    ],
+  },
 ];
 
 const columnLabels = (
@@ -224,12 +289,12 @@ const attemptRows = (
   hasCutoff: boolean,
   numAttempts: number,
   scorecardWidth: number
-) => {
+): TableCell[][] => {
   const numCutoffAttempts = numAttempts <= 3 ? 1 : 2;
 
   return times(numAttempts, (attemptIndex) =>
     attemptRow(attemptIndex + 1)
-  ).reduce(
+  ).reduce<TableCell[][]>(
     (rows, attemptRow, attemptIndex) =>
       attemptIndex + 1 === numAttempts
         ? [...rows, attemptRow]
@@ -272,9 +337,9 @@ const attemptsSeparator = (
   },
 ];
 
-const attemptRow = (attemptNumber: number): TableCell[] => [
+const attemptRow = (text: any): TableCell[] => [
   {
-    text: attemptNumber,
+    text,
     ...noBorder,
     fontSize: 20,
     bold: true,
