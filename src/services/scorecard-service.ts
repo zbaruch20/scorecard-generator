@@ -175,6 +175,7 @@ const scorecardContent = (
     cutoffSeconds,
     timeLimitMinutes,
     timeLimitSeconds,
+    groupFormat,
   }: ScorecardGeneratorData
 ): Content => [
   {
@@ -202,7 +203,10 @@ const scorecardContent = (
         [
           event,
           { text: round, alignment: "center" },
-          { text: competitor.group, alignment: "center" },
+          {
+            text: GroupFormat.Blank !== groupFormat ? competitor.group : " ",
+            alignment: "center",
+          },
         ],
       ],
     },
