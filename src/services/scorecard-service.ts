@@ -144,7 +144,7 @@ const scorecardsPdfDefinition = (
         vLineWidth: () => 0,
       },
       table: {
-        widths: "*",
+        widths: times(scorecardsPerRow, () => '*'),
         heights: pageHeight / scorecardsPerRow - 2 * verticalMargin,
         dontBreakRows: true,
         body: chunk(scorecardList(data), scorecardsPerRow),
