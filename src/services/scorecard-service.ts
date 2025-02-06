@@ -13,7 +13,15 @@ import GroupFormat from "../models/group-format";
 import ScorecardGeneratorData from "../models/scorecard-generator-data";
 import ScorecardPaperSizeInfo from "../models/scorecard-paper-size-info";
 import pdfMakeSG from "./pdfmake";
-import { chunk, getMinutes, getSeconds, pdfName, slugify, times } from "./utils";
+import {
+  chunk,
+  getMinutes,
+  getSeconds,
+  pdfName,
+  shuffle,
+  slugify,
+  times,
+} from "./utils";
 
 // Scorecard generation adapted from Groupfier by Jonatan Kłosko https://github.com/jonatanklosko/groupifier
 
@@ -47,8 +55,6 @@ const scorecardPaperSizeInfos: { [name: string]: ScorecardPaperSizeInfo } = {
 
 const generateScorecards = (data: ScorecardGeneratorData): void => {
   const definition = scorecardsPdfDefinition(processCompetitors(data));
-
-  console.log("generateScorecards() called at: ", new Date());
   pdfMakeSG.createPdf(definition).open();
 };
 
@@ -65,8 +71,8 @@ const processCompetitors = (
   return { ...data, competitors };
 };
 
-// TODO - maybe try doing full random
 const assignGroups = (competitors: Competitor[], numGroups: number): void => {
+  shuffle(competitors, 0, c => c.regId)
   for (let i = 0; i < competitors.length; i++) {
     competitors[i].group = ((i + 1) % numGroups) + 1;
   }
@@ -83,7 +89,13 @@ const addBlanks = (
 };
 
 const sortByGroups = (competitors: Competitor[]): void => {
-  competitors.sort((a, b) => a.group - b.group || a.name.localeCompare(b.name));
+  competitors.sort((a, b) => a.group - b.group || compareNames(a.name, b.name));
+};
+
+const compareNames = (a: string, b: string): number => {
+  if (!a || a.length === 0) return Number.MAX_SAFE_INTEGER;
+  if (!b || b.length === 0) return Number.MIN_SAFE_INTEGER;
+  return a.localeCompare(b);
 };
 
 // This assumes data.competitors has been properly processed (e.g. assigned groups and sorted)
@@ -144,7 +156,7 @@ const scorecardsPdfDefinition = (
         vLineWidth: () => 0,
       },
       table: {
-        widths: times(scorecardsPerRow, () => '*'),
+        widths: times(scorecardsPerRow, () => "*"),
         heights: pageHeight / scorecardsPerRow - 2 * verticalMargin,
         dontBreakRows: true,
         body: chunk(scorecardList(data), scorecardsPerRow),
@@ -266,12 +278,16 @@ const scorecardContent = (
     columns: [
       hasCutoff
         ? {
-            text: `Cutoff: < ${getMinutes(cutoffMinutes)}:${getSeconds(cutoffSeconds)}`,
+            text: `Cutoff: < ${getMinutes(cutoffMinutes)}:${getSeconds(
+              cutoffSeconds
+            )}`,
             alignment: "center",
           }
         : ({} as Column),
       {
-        text: `Time limit: ${getMinutes(timeLimitMinutes)}:${getSeconds(timeLimitSeconds)}`,
+        text: `Time limit: ${getMinutes(timeLimitMinutes)}:${getSeconds(
+          timeLimitSeconds
+        )}`,
       },
     ],
   },

@@ -105,9 +105,12 @@ const App = () => {
 
   const addBulkCompetitors = () => {
     const newCompetitors = bulkNames.split(/\n/).map((n) => {
-      const nameAndId = n.split(/\s*\|\s*/);
+      const nameWcaAndReg = n.split(/\s*>\s*/);
+      const regId = nameWcaAndReg[1] || 0;
+
+      const nameAndId = nameWcaAndReg[0].split(/\s*\|\s*/);
       const wcaId = nameAndId[1] || NEW_COMPETITOR;
-      return { name: nameAndId[0], wcaId, group: 0 } as Competitor;
+      return { name: nameAndId[0], wcaId, group: 0, regId } as Competitor;
     });
     if (competitors.length === currentCompetitorIdx) {
       setCurrentCompetitorIdx((curr) => curr + newCompetitors.length);
@@ -536,7 +539,9 @@ const App = () => {
         <ModalBody>
           <FormLabel>
             Enter a list of competitors, one name per line. To include WCA IDs,
-            use the format <code>Name | ID</code>.
+            use the format <code>name | wca_id</code>. To include registration
+            IDs, use the format <code>name &gt; reg_id</code> or{" "}
+            <code>name | wca_id &gt; reg_id</code>.
           </FormLabel>
           <FormControl
             as="textarea"
