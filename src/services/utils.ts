@@ -67,6 +67,8 @@ export const slugify = (s: string) =>
     .toLocaleLowerCase()
     .replace(/\s+(-+\s+)+|\s+/g, "-");
 
-export const getSeconds = (n: number): string => {
-  return `${n < 10 ? 0 : ""}${n}.00`;
-};
+export const getMinutes = (n: number) =>
+  n < 60 ? n : `${Math.floor(n / 60)}:${getSeconds(n % 60, false)}`;
+
+export const getSeconds = (n: number, decimal = true) =>
+  `${n < 10 ? 0 : ""}${n}${decimal ? ".00" : ""}`;
