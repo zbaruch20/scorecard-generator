@@ -266,14 +266,12 @@ const scorecardContent = (
     columns: [
       hasCutoff
         ? {
-            text: `Cutoff: < ${cutoffMinutes}:${getSeconds(cutoffSeconds)}.00`,
+            text: `Cutoff: < ${cutoffMinutes}:${getSeconds(cutoffSeconds)}`,
             alignment: "center",
           }
         : ({} as Column),
       {
-        text: `Time limit: ${timeLimitMinutes}:${getSeconds(
-          timeLimitSeconds
-        )}.00`,
+        text: `Time limit: ${timeLimitMinutes}:${getSeconds(timeLimitSeconds)}`,
       },
     ],
   },

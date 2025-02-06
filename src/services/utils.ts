@@ -68,5 +68,5 @@ export const slugify = (s: string) =>
     .replace(/\s+(-+\s+)+|\s+/g, "-");
 
 export const getSeconds = (n: number): string => {
-  return `${n < 10 ? 0 : ""}${n}`;
+  return `${n < 10 ? 0 : ""}${n}.00`;
 };
