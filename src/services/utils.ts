@@ -61,11 +61,12 @@ export const chunk = <T>(arr: T[], size: number): T[][] => {
 export const times = <T>(n: number, fn: (x: number) => T): T[] =>
   Array.from({ length: n }, (_, i) => fn(i));
 
-// export const flatMap = <T, U>(arr: T[], fn: (x: T) => U[]): U[] =>
-//   arr.reduce<U[]>((acc, curr) => acc.concat(fn(curr)), []);
-
 export const slugify = (s: string) =>
   s
     .replace(/['.:&]/g, "")
     .toLocaleLowerCase()
     .replace(/\s+(-+\s+)+|\s+/g, "-");
+
+export const getSeconds = (n: number): string => {
+  return `${n < 10 ? 0 : ""}${n}`;
+};

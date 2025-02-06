@@ -13,7 +13,7 @@ import GroupFormat from "../models/group-format";
 import ScorecardGeneratorData from "../models/scorecard-generator-data";
 import ScorecardPaperSizeInfo from "../models/scorecard-paper-size-info";
 import pdfMakeSG from "./pdfmake";
-import { chunk, pdfName, slugify, times } from "./utils";
+import { chunk, getSeconds, pdfName, slugify, times } from "./utils";
 
 // Scorecard generation adapted from Groupfier by Jonatan Kłosko https://github.com/jonatanklosko/groupifier
 
@@ -266,12 +266,14 @@ const scorecardContent = (
     columns: [
       hasCutoff
         ? {
-            text: `Cutoff: < ${cutoffMinutes}:${cutoffSeconds}.00`,
+            text: `Cutoff: < ${cutoffMinutes}:${getSeconds(cutoffSeconds)}.00`,
             alignment: "center",
           }
         : ({} as Column),
       {
-        text: `Time limit: ${timeLimitMinutes}:${timeLimitSeconds}.00`,
+        text: `Time limit: ${timeLimitMinutes}:${getSeconds(
+          timeLimitSeconds
+        )}.00`,
       },
     ],
   },
