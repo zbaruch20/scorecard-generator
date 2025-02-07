@@ -194,7 +194,7 @@ const scorecardContent = (
 ): Content => [
   {
     fontSize: 10,
-    text: num + 1,
+    text: competitor.name && num + 1,
     alignment: "left",
   },
   {
