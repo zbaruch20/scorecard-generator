@@ -1,5 +1,6 @@
 import { Content } from "pdfmake/interfaces";
 import PdfNameProps from "../models/pdf-name-props";
+import { isConstructorDeclaration } from "typescript";
 
 export const CURRENT_YEAR = new Date().getFullYear();
 export const NEW_COMPETITOR = "New competitor";
@@ -52,13 +53,9 @@ const determineFont = (text: string) => {
 
 export const inRange = (x: number, a: number, b: number) => a <= x && x <= b;
 
-export const shuffle = <T, U>(
-  arr: T[],
-  start: number = 0,
-  fn: (x: T) => T | U = (x) => x
-): void => {
+export const shuffle = <T, U>(arr: T[], start: number = 0): void => {
   if (arr.length > 1 && start < arr.length - 1) {
-    shuffle(arr, start + 1, fn);
+    shuffle(arr, start + 1);
     const toReplace = arr[start];
     arr.splice(start, 1);
     const i = Math.floor(Math.random() * (arr.length - start - 1)) + start;

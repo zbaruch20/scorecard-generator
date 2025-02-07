@@ -520,7 +520,7 @@ const App = () => {
               groupFormat,
               numBlanksPerGroup,
               numGroups,
-              competitors,
+              competitors: competitors.filter((c) => !!c),
             };
             generateScorecards(data);
           }}

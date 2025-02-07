@@ -72,8 +72,9 @@ const processCompetitors = (
 };
 
 const assignGroups = (competitors: Competitor[], numGroups: number): void => {
-  shuffle(competitors, 0, c => c.regId)
+  shuffle(competitors, 0)
   for (let i = 0; i < competitors.length; i++) {
+    competitors[i] ||= newCompetitor();
     competitors[i].group = ((i + 1) % numGroups) + 1;
   }
 };
