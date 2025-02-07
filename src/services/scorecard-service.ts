@@ -137,7 +137,7 @@ const scorecardsPdfDefinition = (
   return {
     info: {
       title: slugify(
-        `${data.competition}-scorecards-${data.event}-round-${data.round}`
+        `${data.competition}-scorecards-${data.event.toLocaleLowerCase()}-round-${data.round}`
       ),
     },
     background: cutLines,
