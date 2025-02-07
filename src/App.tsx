@@ -104,7 +104,7 @@ const App = () => {
   };
 
   const addBulkCompetitors = () => {
-    const newCompetitors = bulkNames.split(/\n/).map((n) => {
+    const newCompetitors = bulkNames.split(/\n+/).map((n) => {
       const nameWcaAndReg = n.split(/\s*>\s*/);
       const regId = nameWcaAndReg[1] || 0;
 
