@@ -52,12 +52,16 @@ const determineFont = (text: string) => {
 
 export const inRange = (x: number, a: number, b: number) => a <= x && x <= b;
 
-export const shuffle = <T, U>(arr: T[], start: number = 0, fn: (x: T) => T|U = (x => x)): void => {
+export const shuffle = <T, U>(
+  arr: T[],
+  start: number = 0,
+  fn: (x: T) => T | U = (x) => x
+): void => {
   if (arr.length > 1 && start < arr.length - 1) {
     shuffle(arr, start + 1, fn);
     const toReplace = arr[start];
-    arr.splice(start, 1)
-    const i = Math.floor(Math.random() * (arr.length - start - 1)) + start
+    arr.splice(start, 1);
+    const i = Math.floor(Math.random() * (arr.length - start - 1)) + start;
     arr.splice(i, 0, toReplace);
   }
 };
@@ -72,10 +76,7 @@ export const times = <T>(n: number, fn: (x: number) => T): T[] =>
   Array.from({ length: n }, (_, i) => fn(i));
 
 export const slugify = (s: string) =>
-  s
-    .replace(/['.:&]/g, "")
-    .toLocaleLowerCase()
-    .replace(/\s+(-+\s+)+|\s+/g, "-");
+  s.replace(/['.:&]/g, "").replace(/\s+(-+\s+)+|\s+/g, "-");
 
 export const getMinutes = (n: number) =>
   n < 60 ? n : `${Math.floor(n / 60)}:${getSeconds(n % 60, false)}`;
