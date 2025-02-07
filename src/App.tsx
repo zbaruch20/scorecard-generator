@@ -455,7 +455,33 @@ const App = () => {
       <Container className="mt-4">
         {competitors.length > 0 && (
           <>
-            <h6>{competitors.length} Competitors Assigned</h6>
+            <h6>{competitors.length} Competitors Assigned
+            <Button
+              className="mx-3"
+              variant="success"
+              onClick={() => {
+                const data: ScorecardGeneratorData = {
+                  competition,
+                  event,
+                  round,
+                  numAttempts,
+                  paperSize,
+                  hasCutoff,
+                  cutoffMinutes,
+                  cutoffSeconds,
+                  timeLimitMinutes,
+                  timeLimitSeconds,
+                  groupFormat,
+                  numBlanksPerGroup,
+                  numGroups,
+                  competitors: competitors.filter((c) => !!c),
+                };
+                generateScorecards(data);
+              }}
+            >
+              Generate Scorecards
+            </Button>
+            </h6>
             <Table striped bordered hover>
               <thead>
                 <tr>
