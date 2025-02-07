@@ -454,50 +454,53 @@ const App = () => {
 
       <Container className="mt-4">
         {competitors.length > 0 && (
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                {includeIds && <th>ID</th>}
-                {isManualGroups() && <th>Group</th>}
-                <th>WCA ID</th>
-                <th>Competitor Name</th>
-                <th>Modify?</th>
-              </tr>
-            </thead>
-            <tbody>
-              {competitors.map((c, i) => (
-                <tr key={i}>
-                  {includeIds && <td>{c.regId}</td>}
-                  {isManualGroups() && <td>{c.group}</td>}
-                  <td>{c.wcaId}</td>
-                  <td>{c.name}</td>
-                  <td>
-                    <Button
-                      className="me-1"
-                      variant="warning"
-                      size="sm"
-                      onClick={() => {
-                        setCurrentCompetitor(competitors[i]);
-                        setCurrentCompetitorIdx(i);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => {
-                        deleteCompetitor(i);
-                        setCurrentCompetitorIdx((curr) => curr - 1);
-                      }}
-                    >
-                      Delete
-                    </Button>
-                  </td>
+          <>
+            <h6>{competitors.length} Competitors Assigned</h6>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  {includeIds && <th>ID</th>}
+                  {isManualGroups() && <th>Group</th>}
+                  <th>WCA ID</th>
+                  <th>Competitor Name</th>
+                  <th>Modify?</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {competitors.map((c, i) => (
+                  <tr key={i}>
+                    {includeIds && <td>{c.regId}</td>}
+                    {isManualGroups() && <td>{c.group}</td>}
+                    <td>{c.wcaId}</td>
+                    <td>{c.name}</td>
+                    <td>
+                      <Button
+                        className="me-1"
+                        variant="warning"
+                        size="sm"
+                        onClick={() => {
+                          setCurrentCompetitor(competitors[i]);
+                          setCurrentCompetitorIdx(i);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => {
+                          deleteCompetitor(i);
+                          setCurrentCompetitorIdx((curr) => curr - 1);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </>
         )}
       </Container>
 
