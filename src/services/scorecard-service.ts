@@ -72,7 +72,7 @@ const processCompetitors = (
 };
 
 const assignGroups = (competitors: Competitor[], numGroups: number): void => {
-  shuffle(competitors, 0)
+  shuffle(competitors, 0);
   for (let i = 0; i < competitors.length; i++) {
     competitors[i] ||= newCompetitor();
     competitors[i].group = ((i + 1) % numGroups) + 1;
@@ -168,10 +168,11 @@ const scorecardsPdfDefinition = (
 
 const scorecardList = (data: ScorecardGeneratorData): Content[] => {
   const paperInfo = scorecardPaperSizeInfos[data.paperSize];
-
-  return data.competitors.map((c, num) =>
+  const scorecards = data.competitors.map((c, num) =>
     scorecardContent(c, num, paperInfo, data)
   );
+
+  return scorecards.length % 2 === 0 ? scorecards : [...scorecards, ""];
 };
 
 const scorecardContent = (
