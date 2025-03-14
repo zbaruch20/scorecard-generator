@@ -106,7 +106,6 @@ const App = () => {
   const addBulkCompetitors = () => {
     // Split the bulk names by new lines and map each line to a competitor object
     const newCompetitors = bulkNames.split(/\n+/).map((n) => {
-
       // Split the line by '-' to separate name, WCA ID, and group
       const nameWcaRegAndGroup = n.split(/\s*-\s*/);
       const group = nameWcaRegAndGroup[1] || 0;
@@ -465,32 +464,33 @@ const App = () => {
       <Container className="mt-4">
         {competitors.length > 0 && (
           <>
-            <h6>{competitors.length} Competitors Assigned
-            <Button
-              className="mx-3"
-              variant="success"
-              onClick={() => {
-                const data: ScorecardGeneratorData = {
-                  competition,
-                  event,
-                  round,
-                  numAttempts,
-                  paperSize,
-                  hasCutoff,
-                  cutoffMinutes,
-                  cutoffSeconds,
-                  timeLimitMinutes,
-                  timeLimitSeconds,
-                  groupFormat,
-                  numBlanksPerGroup,
-                  numGroups,
-                  competitors: competitors.filter((c) => !!c),
-                };
-                generateScorecards(data);
-              }}
-            >
-              Generate Scorecards
-            </Button>
+            <h6>
+              {competitors.length} Competitors Assigned
+              <Button
+                className="mx-3"
+                variant="success"
+                onClick={() => {
+                  const data: ScorecardGeneratorData = {
+                    competition,
+                    event,
+                    round,
+                    numAttempts,
+                    paperSize,
+                    hasCutoff,
+                    cutoffMinutes,
+                    cutoffSeconds,
+                    timeLimitMinutes,
+                    timeLimitSeconds,
+                    groupFormat,
+                    numBlanksPerGroup,
+                    numGroups,
+                    competitors: competitors.filter((c) => !!c),
+                  };
+                  generateScorecards(data);
+                }}
+              >
+                Generate Scorecards
+              </Button>
             </h6>
             <Table striped bordered hover>
               <thead>
@@ -578,13 +578,13 @@ const App = () => {
         <ModalBody>
           <FormLabel>
             <Container>
-              Enter a list of competitors, one name per line.
-              To include WCA IDs, registration IDs, or groups, use the following format:
-
-              <pre className="mt-3 text-center">name [| wca_id] [&gt; reg_id] [- group]</pre>
-
-              You do not need to include all fields, but they must be in the order
-              as shown above.
+              Enter a list of competitors, one name per line. To include WCA
+              IDs, registration IDs, or groups, use the following format:
+              <pre className="mt-3 text-center">
+                name [| wca_id] [&gt; reg_id] [- group]
+              </pre>
+              You do not need to include all fields, but they must be in the
+              order as shown above.
             </Container>
           </FormLabel>
           <FormControl

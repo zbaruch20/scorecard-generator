@@ -8,7 +8,7 @@ import {
   TableCell,
   TableCellProperties,
 } from "pdfmake/interfaces";
-import Competitor, { newCompetitor } from "../models/competitor";
+import Competitor, { newCompetitor, padCompetitor } from "../models/competitor";
 import GroupFormat from "../models/group-format";
 import ScorecardGeneratorData from "../models/scorecard-generator-data";
 import ScorecardPaperSizeInfo from "../models/scorecard-paper-size-info";
@@ -62,13 +62,25 @@ const processCompetitors = (
   data: ScorecardGeneratorData
 ): ScorecardGeneratorData => {
   const competitors = [...data.competitors]; // make a copy
+
   if (GroupFormat.Random == data.groupFormat) {
     assignGroups(competitors, data.numGroups);
   }
+
   addBlanks(competitors, data.numBlanksPerGroup, data.numGroups);
   sortByGroups(competitors);
 
-  return { ...data, competitors };
+  if (
+    GroupFormat.Blank !== data.groupFormat &&
+    scorecardPaperSizeInfos[data.paperSize].scorecardsPerPage === 4
+  ) {
+    padGroups(competitors, data.numGroups);
+  }
+
+  return {
+    ...data,
+    competitors,
+  };
 };
 
 const assignGroups = (competitors: Competitor[], numGroups: number): void => {
@@ -97,6 +109,25 @@ const compareNames = (a: string, b: string): number => {
   if (!a || a.length === 0) return Number.MAX_SAFE_INTEGER;
   if (!b || b.length === 0) return Number.MIN_SAFE_INTEGER;
   return a.localeCompare(b);
+};
+
+// This assumes competitors has already been sorted by group
+const padGroups = (competitors: Competitor[], numGroups: number): void => {
+  let numInGroup = 0;
+  for (let i = 0; i < competitors.length; i++) {
+    const c = competitors[i];
+    if (!c.isPad) {
+      numInGroup++;
+      if (
+        i === competitors.length - 1 ||
+        competitors[i + 1].group !== c.group
+      ) {
+        const numEmpty = (4 - (numInGroup % 4)) % 4;
+        competitors.splice(i + 1, 0, ...times(numEmpty, padCompetitor));
+        numInGroup = 0;
+      }
+    }
+  }
 };
 
 // This assumes data.competitors has been properly processed (e.g. assigned groups and sorted)
@@ -137,7 +168,9 @@ const scorecardsPdfDefinition = (
   return {
     info: {
       title: slugify(
-        `${data.competition}-scorecards-${data.event.toLocaleLowerCase()}-round-${data.round}`
+        `${
+          data.competition
+        }-scorecards-${data.event.toLocaleLowerCase()}-round-${data.round}`
       ),
     },
     background: cutLines,
@@ -191,109 +224,114 @@ const scorecardContent = (
     timeLimitSeconds,
     groupFormat,
   }: ScorecardGeneratorData
-): Content => [
-  {
-    fontSize: 10,
-    text: competitor.name && num + 1,
-    alignment: "left",
-  },
-  {
-    text: competition,
-    bold: true,
-    fontSize: 15,
-    marginBottom: 10,
-    alignment: "center",
-  },
-  {
-    marginLeft: 25,
-    table: {
-      widths: ["*", 30, 30],
-      body: [
-        columnLabels([
-          "Event",
-          { text: "Round", alignment: "center" },
-          { text: "Group", alignment: "center" },
-        ]),
-        [
-          event,
-          { text: round, alignment: "center" },
-          {
-            text: GroupFormat.Blank !== groupFormat ? competitor.group : " ",
-            alignment: "center",
-          },
-        ],
-      ],
-    },
-  },
-  {
-    marginLeft: 25,
-    table: {
-      widths: [30, "*"],
-      body: [
-        columnLabels([
-          "ID",
-          [
-            { text: "Name", alignment: "left", width: "auto" },
-            { text: competitor.wcaId, alignment: "right" },
-          ],
-        ]),
-        [
-          { text: competitor.regId || " ", alignment: "center" },
-          {
-            text: pdfName(competitor.name || " "),
-            maxHeight: 20 /* See: https://github.com/bpampuch/pdfmake/issues/264#issuecomment-108347567 */,
-          },
-        ],
-      ],
-    },
-  },
-  {
-    marginTop: 10,
-    table: {
-      /* Note: 16 (width) + 4 + 4 (defult left and right padding) + 1 (left border) = 25 */
-      widths: [16, 25, "*", 25, 25],
-      body: [
-        columnLabels(["", "Scr", "Result", "Judge", "Comp"], {
+): Content =>
+  competitor.isPad
+    ? ""
+    : [
+        {
+          fontSize: 10,
+          text: competitor.name && num + 1,
+          alignment: "left",
+        },
+        {
+          text: competition,
+          bold: true,
+          fontSize: 15,
+          marginBottom: 10,
           alignment: "center",
-        }),
-        ...attemptRows(
-          hasCutoff,
-          numAttempts,
-          pageWidth / scorecardsPerRow - 2 * horizontalMargin
-        ),
-        [
-          {
-            text: "Extra" + " (" + "Delegate initials" + " _______)",
-            ...noBorder,
-            colSpan: 5,
-            margin: [0, 1],
-            fontSize: 10,
+        },
+        {
+          marginLeft: 25,
+          table: {
+            widths: ["*", 30, 30],
+            body: [
+              columnLabels([
+                "Event",
+                { text: "Round", alignment: "center" },
+                { text: "Group", alignment: "center" },
+              ]),
+              [
+                event,
+                { text: round, alignment: "center" },
+                {
+                  text:
+                    GroupFormat.Blank !== groupFormat ? competitor.group : " ",
+                  alignment: "center",
+                },
+              ],
+            ],
           },
-        ],
-        attemptRow("_"),
-        [{ text: "", ...noBorder, colSpan: 5, margin: [0, 1] }],
-      ],
-    },
-  },
-  {
-    fontSize: 10,
-    columns: [
-      hasCutoff
-        ? {
-            text: `Cutoff: < ${getMinutes(cutoffMinutes)}:${getSeconds(
-              cutoffSeconds
-            )}`,
-            alignment: "center",
-          }
-        : ({} as Column),
-      {
-        text: `Time limit: ${getMinutes(timeLimitMinutes)}:${getSeconds(
-          timeLimitSeconds
-        )}`,
-      },
-    ],
-  },
-];
+        },
+        {
+          marginLeft: 25,
+          table: {
+            widths: [30, "*"],
+            body: [
+              columnLabels([
+                "ID",
+                [
+                  { text: "Name", alignment: "left", width: "auto" },
+                  { text: competitor.wcaId, alignment: "right" },
+                ],
+              ]),
+              [
+                { text: competitor.regId || " ", alignment: "center" },
+                {
+                  text: pdfName(competitor.name || " "),
+                  maxHeight: 20 /* See: https://github.com/bpampuch/pdfmake/issues/264#issuecomment-108347567 */,
+                },
+              ],
+            ],
+          },
+        },
+        {
+          marginTop: 10,
+          table: {
+            /* Note: 16 (width) + 4 + 4 (defult left and right padding) + 1 (left border) = 25 */
+            widths: [16, 25, "*", 25, 25],
+            body: [
+              columnLabels(["", "Scr", "Result", "Judge", "Comp"], {
+                alignment: "center",
+              }),
+              ...attemptRows(
+                hasCutoff,
+                numAttempts,
+                pageWidth / scorecardsPerRow - 2 * horizontalMargin
+              ),
+              [
+                {
+                  text:
+                    "Extra attempt" + " (" + "Delegate initials" + " _______)",
+                  ...noBorder,
+                  colSpan: 5,
+                  margin: [0, 1],
+                  fontSize: 10,
+                },
+              ],
+              attemptRow("_"),
+              [{ text: "", ...noBorder, colSpan: 5, margin: [0, 1] }],
+            ],
+          },
+        },
+        {
+          fontSize: 10,
+          columns: [
+            hasCutoff
+              ? {
+                  text: `Cutoff: < ${getMinutes(cutoffMinutes)}:${getSeconds(
+                    cutoffSeconds
+                  )}`,
+                  alignment: "center",
+                }
+              : ({} as Column),
+            {
+              text: `Time limit: ${getMinutes(timeLimitMinutes)}:${getSeconds(
+                timeLimitSeconds
+              )}`,
+            },
+          ],
+        },
+      ];
 
 const columnLabels = (
   labels: TableCell[],
