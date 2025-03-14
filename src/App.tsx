@@ -104,17 +104,27 @@ const App = () => {
   };
 
   const addBulkCompetitors = () => {
+    // Split the bulk names by new lines and map each line to a competitor object
     const newCompetitors = bulkNames.split(/\n+/).map((n) => {
-      const nameWcaAndReg = n.split(/\s*>\s*/);
+
+      // Split the line by '-' to separate name, WCA ID, and group
+      const nameWcaRegAndGroup = n.split(/\s*-\s*/);
+      const group = nameWcaRegAndGroup[1] || 0;
+
+      // Split the name and WCA ID by '>' to separate registration ID
+      const nameWcaAndReg = nameWcaRegAndGroup[0].split(/\s*>\s*/);
       const regId = nameWcaAndReg[1] || 0;
 
+      // Split the name and WCA ID by '|' to separate WCA ID
       const nameAndId = nameWcaAndReg[0].split(/\s*\|\s*/);
       const wcaId = nameAndId[1] || NEW_COMPETITOR;
-      return { name: nameAndId[0], wcaId, group: 0, regId } as Competitor;
+      return { name: nameAndId[0], wcaId, group, regId } as Competitor;
     });
+
     if (competitors.length === currentCompetitorIdx) {
       setCurrentCompetitorIdx((curr) => curr + newCompetitors.length);
     }
+
     setCompetitors((competitors) => [...competitors, ...newCompetitors]);
     setBulkNames("");
     setShowBulkEntry(false);
@@ -567,10 +577,15 @@ const App = () => {
 
         <ModalBody>
           <FormLabel>
-            Enter a list of competitors, one name per line. To include WCA IDs,
-            use the format <code>name | wca_id</code>. To include registration
-            IDs, use the format <code>name &gt; reg_id</code> or{" "}
-            <code>name | wca_id &gt; reg_id</code>.
+            <Container>
+              Enter a list of competitors, one name per line.
+              To include WCA IDs, registration IDs, or groups, use the following format:
+
+              <pre className="mt-3 text-center">name [| wca_id] [&gt; reg_id] [- group]</pre>
+
+              You do not need to include all fields, but they must be in the order
+              as shown above.
+            </Container>
           </FormLabel>
           <FormControl
             as="textarea"
