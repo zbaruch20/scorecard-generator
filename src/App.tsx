@@ -577,13 +577,15 @@ const App = () => {
 
         <ModalBody>
           <FormLabel>
-            Enter a list of competitors, one name per line. To include WCA IDs,
-            use the format <code>name | wca_id</code>. To include registration
-            IDs, use the format <code>name &gt; reg_id</code> or{" "}
-            <code>name | wca_id &gt; reg_id</code>.
-            
-            To include groups, add the group number at the end separated by
-            a dash, e.g. <code>- group</code>.
+            <Container>
+              Enter a list of competitors, one name per line.
+              To include WCA IDs, registration IDs, or groups, use the following format:
+
+              <pre className="mt-3 text-center">name [| wca_id] [&gt; reg_id] [- group]</pre>
+
+              You do not need to include all fields, but they must be in the order
+              as shown above.
+            </Container>
           </FormLabel>
           <FormControl
             as="textarea"
