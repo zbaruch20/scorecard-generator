@@ -318,16 +318,16 @@ const scorecardContent = (
           columns: [
             hasCutoff
               ? {
-                  text: `Cutoff: < ${getMinutes(cutoffMinutes)}:${getSeconds(
-                    cutoffSeconds
-                  )}`,
+                  text: `Cutoff: < ${
+                    cutoffMinutes > 0 ? getMinutes(cutoffMinutes) + ":" : ""
+                  }${getSeconds(cutoffSeconds)}`,
                   alignment: "center",
                 }
               : ({} as Column),
             {
-              text: `Time limit: ${getMinutes(timeLimitMinutes)}:${getSeconds(
-                timeLimitSeconds
-              )}`,
+              text: `Time limit: ${
+                timeLimitMinutes > 0 ? getMinutes(timeLimitMinutes) + ":" : ""
+              }${getSeconds(timeLimitSeconds)}`,
             },
           ],
         },
