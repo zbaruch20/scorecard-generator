@@ -16,15 +16,16 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
-import Competitor, { newCompetitor } from "./models/competitor";
-import GroupFormat, { GroupFormatStrings } from "./models/group-format";
+import type Competitor from "./models/competitor";
+import { newCompetitor } from "./models/competitor";
+import GroupFormat, { type GroupFormatStrings } from "./models/group-format";
 import { randomName } from "./models/sample-names";
-import ScorecardGeneratorData from "./models/scorecard-generator-data";
+import type ScorecardGeneratorData from "./models/scorecard-generator-data";
 import generateScorecards from "./services/scorecard-service";
 import ScorecardGeneratorCopyright from "./components/copyright";
 import ScorecardGeneratorNavbar from "./components/navbar";
 import { CURRENT_YEAR, NEW_COMPETITOR } from "./services/utils";
-import PaperSize, { PaperSizeStrings } from "./models/paper-sizes";
+import PaperSize, { type PaperSizeStrings } from "./models/paper-sizes";
 
 const App = () => {
   const [competition, setCompetition] = useState<string>(

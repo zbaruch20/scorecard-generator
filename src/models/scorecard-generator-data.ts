@@ -1,4 +1,4 @@
-import Competitor from "./competitor";
+import type Competitor from "./competitor";
 import GroupFormat from "./group-format";
 import PaperSize from "./paper-sizes";
 

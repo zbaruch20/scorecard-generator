@@ -1,4 +1,4 @@
-import {
+import type {
   CanvasLine,
   Column,
   Content,
@@ -8,10 +8,11 @@ import {
   TableCell,
   TableCellProperties,
 } from "pdfmake/interfaces";
-import Competitor, { newCompetitor, padCompetitor } from "../models/competitor";
+import { newCompetitor, padCompetitor } from "../models/competitor";
+import type Competitor from "../models/competitor";
 import GroupFormat from "../models/group-format";
-import ScorecardGeneratorData from "../models/scorecard-generator-data";
-import ScorecardPaperSizeInfo from "../models/scorecard-paper-size-info";
+import type ScorecardGeneratorData from "../models/scorecard-generator-data";
+import type ScorecardPaperSizeInfo from "../models/scorecard-paper-size-info";
 import pdfMakeSG from "./pdfmake";
 import {
   chunk,
@@ -112,7 +113,7 @@ const compareNames = (a: string, b: string): number => {
 };
 
 // This assumes competitors has already been sorted by group
-const padGroups = (competitors: Competitor[], numGroups: number): void => {
+const padGroups = (competitors: Competitor[], _numGroups: number): void => {
   let numInGroup = 0;
   for (let i = 0; i < competitors.length; i++) {
     const c = competitors[i];
